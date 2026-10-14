@@ -172,18 +172,20 @@ void drawEdge(QPainter &p, const EdgeData &e, const QHash<QString, QRectF> &rect
     path.cubicTo(c1, c2, p2);
     p.setPen(pen); p.setBrush(Qt::NoBrush);
     p.drawPath(path);
-    if (e.data.value("arrow").toBool()) {
-        QPointF d = p2 - c2;
-        if (d.manhattanLength() < 0.01) d = p2 - p1;
-        const double a = qAtan2(d.y(), d.x()), s = 8 + w * 1.5;
+    const auto head = [&](const QPointF &tip, QPointF d, const QPointF &fallback) {
+        if (d.manhattanLength() < 0.01) d = fallback;
+        const double a = qAtan2(d.y(), d.x()), s = 7 + w * 1.6;
         QPainterPath tri;
-        tri.moveTo(p2);
-        tri.lineTo(p2 - QPointF(qCos(a - 0.45), qSin(a - 0.45)) * s);
-        tri.lineTo(p2 - QPointF(qCos(a + 0.45), qSin(a + 0.45)) * s);
+        tri.moveTo(tip);
+        tri.lineTo(tip - QPointF(qCos(a - 0.45), qSin(a - 0.45)) * s);
+        tri.lineTo(tip - QPointF(qCos(a) , qSin(a)) * (s * 0.78));
+        tri.lineTo(tip - QPointF(qCos(a + 0.45), qSin(a + 0.45)) * s);
         tri.closeSubpath();
         p.setPen(Qt::NoPen); p.setBrush(col);
         p.drawPath(tri);
-    }
+    };
+    if (e.data.value("arrow").toBool(true)) head(p2, p2 - c2, p2 - p1);
+    if (e.data.value("arrowStart").toBool(false)) head(p1, p1 - c1, p1 - p2);
     if (!e.label.isEmpty()) {
         const QPointF m = EdgeModel::bezier(p1, c1, c2, p2, 0.5);
         p.setFont(uiFont(11, QFont::Medium));

@@ -59,3 +59,7 @@ tools/         release.sh, prune_bundle.sh, dev-test.sh, make_fixture.py, drive/
 
 ## Publicar una versión
 1. Subir `VERSION` en `CMakeLists.txt`. 2. `tools/release.sh` (≈6 a 9 min; correrlo en background). 3. Validar el zip extraído: `codesign -vvv --deep --strict`, `DYLD_PRINT_LIBRARIES=1` (0 libs de /opt/homebrew, 0 "duplicates"), versión en Info.plist. 4. `git commit` + `git tag -a vX.Y.Z` + push. 5. `gh release create vX.Y.Z dist/Brotherhood-Canvas-X.Y.Z-arm64-mac.zip -R createdbynoone/brotherhood-canvas-qt`.
+
+## Zoom y flechas (v2.1.0)
+- Mismo problema que Studio: un scroll de dos dedos emite magnificaciones diminutas. `CanvasView.qml` estampa `lastScrollMs` en cada rueda; el `PinchHandler` lo ignora 200 ms, exige |escala−1| ≥ 0.03 y la rueda se ignora 160 ms tras un pellizco (`lastPinchMs`). Probado con `tools/drive/arrows.drv` (wheelrun no cambia `Cam.zoom`).
+- Flechas: `arrow` (extremo final) ahora es **verdadero por defecto** (solo `false` explícito lo apaga) y `arrowStart` (extremo inicial, `startAngle` en `EdgeModel`) es opcional. Dos botones en `EdgeBar`. El exportador (PNG/PDF) dibuja las mismas puntas.

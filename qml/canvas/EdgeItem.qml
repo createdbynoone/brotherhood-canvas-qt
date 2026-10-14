@@ -23,6 +23,8 @@ Item {
     required property bool arrow
     required property bool selected
     required property real endAngle
+    required property bool arrowStart
+    required property real startAngle
 
     readonly property bool hovered: Cam.hoverEdgeId === edgeId
     readonly property bool active: selected || hovered
@@ -43,16 +45,15 @@ Item {
             PathCubic { x: edge.x2; y: edge.y2; control1X: edge.c1x; control1Y: edge.c1y; control2X: edge.c2x; control2Y: edge.c2y }
         }
     }
-    Shape {   // arrow head at the target end
-        visible: edge.arrow
-        x: edge.x2; y: edge.y2
-        rotation: edge.endAngle
+    component Head: Shape {   // arrow head with its tip at (0, 0) pointing along +x, placed by x / y / rotation
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             id: ah
-            readonly property real s: 7 + edge.strokeWidth * 1.6
+            readonly property real s: 8 + edge.strokeWidth * 2
             fillColor: edge.tone
-            strokeColor: "transparent"
+            strokeColor: edge.tone
+            strokeWidth: 0.6
+            joinStyle: ShapePath.RoundJoin
             startX: 0; startY: 0
             PathLine { x: -ah.s; y: -ah.s * 0.5 }
             PathLine { x: -ah.s * 0.78; y: 0 }
@@ -60,6 +61,8 @@ Item {
             PathLine { x: 0; y: 0 }
         }
     }
+    Head { visible: edge.arrow; x: edge.x2; y: edge.y2; rotation: edge.endAngle }          // target end
+    Head { visible: edge.arrowStart; x: edge.x1; y: edge.y1; rotation: edge.startAngle }   // source end
     Loader {   // label pill and cut button: only when there is a label or the edge is active
         active: edge.label.length > 0 || edge.active
         sourceComponent: Component {

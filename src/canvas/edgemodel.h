@@ -15,9 +15,9 @@ class EdgeModel : public QAbstractListModel {
 public:
     enum Roles {
         IdRole = Qt::UserRole + 1, X1Role, Y1Role, X2Role, Y2Role, C1XRole, C1YRole, C2XRole, C2YRole, MidXRole, MidYRole,
-        LabelRole, ColorRole, WidthRole, DashedRole, ArrowRole, SelectedRole, SrcSideRole, DstSideRole, AngleRole
+        LabelRole, ColorRole, WidthRole, DashedRole, ArrowRole, SelectedRole, SrcSideRole, DstSideRole, AngleRole, ArrowStartRole, StartAngleRole
     };
-    struct Geo { QPointF p1, p2, c1, c2, mid; double endAngle = 0; bool ok = false; };
+    struct Geo { QPointF p1, p2, c1, c2, mid; double endAngle = 0, startAngle = 0; bool ok = false; };
 
     explicit EdgeModel(BoardModel *board);
 

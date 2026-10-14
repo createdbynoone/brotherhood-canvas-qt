@@ -396,7 +396,11 @@ FocusScope {
 
         onDoubleClicked: m => { if (m.button === Qt.LeftButton) view.doubleClickAt(m.x, m.y) }
 
+        // Scroll pans, Cmd/Ctrl+scroll and pinch zoom. A two-finger scroll on a trackpad also emits tiny
+        // magnify events, so scrolling stamps `lastScrollMs` and the pinch handler ignores that window.
         onWheel: w => {
+            view.lastScrollMs = Date.now()
+            if (Date.now() - view.lastPinchMs < 160) { w.accepted = true; return }   // pinch tail: no stray pan
             if ((w.modifiers & Qt.ControlModifier) || (w.modifiers & Qt.MetaModifier)) {
                 const d = w.pixelDelta.y !== 0 ? w.pixelDelta.y * 0.012 : w.angleDelta.y * 0.0016
                 view.zoomAt(w.x, w.y, Math.exp(d))
@@ -406,12 +410,22 @@ FocusScope {
         }
     }
 
+    property real lastScrollMs: 0
+    property real lastPinchMs: 0
     PinchHandler {
         id: pinch
         target: null
         property real last: 1
-        onActiveChanged: if (active) last = 1
-        onActiveScaleChanged: if (active && last > 0) { view.zoomAt(centroid.position.x, centroid.position.y, activeScale / last); last = activeScale }
+        property bool engaged: false
+        onActiveChanged: { last = 1; engaged = false }
+        onActiveScaleChanged: {
+            if (!active) return
+            if (Date.now() - view.lastScrollMs < 200 && !engaged) { last = activeScale; return }   // part of a scroll
+            if (!engaged) { if (Math.abs(activeScale - 1) < 0.03) return; engaged = true; last = activeScale }
+            view.lastPinchMs = Date.now()
+            if (last > 0) view.zoomAt(centroid.position.x, centroid.position.y, activeScale / last)
+            last = activeScale
+        }
     }
 
     // ── Keyboard ─────────────────────────────────────────────────────────

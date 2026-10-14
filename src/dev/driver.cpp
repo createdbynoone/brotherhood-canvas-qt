@@ -169,6 +169,19 @@ void Driver::run(const QString &raw) {
         bool bad = false;
         const QVariant v = e.evaluate(&bad);
         QTextStream(stdout) << "EVAL " << line.mid(5) << " => " << (bad ? e.error().toString() : v.toString()) << Qt::endl;
+    } else if (cmd == "down" || cmd == "moveto" || cmd == "up") {      // stepwise gesture: down x y [mods] / moveto x y / up x y
+        const Qt::KeyboardModifiers m = mods(p, 3);
+        if (cmd == "down") { mouse(QEvent::MouseMove, num(1), num(2), Qt::NoButton, m); mouse(QEvent::MouseButtonPress, num(1), num(2), Qt::LeftButton, m); m_last = QPointF(num(1), num(2)); }
+        else if (cmd == "moveto") {
+            const QPointF to(num(1), num(2));
+            for (int i = 1; i <= 12; ++i) mouse(QEvent::MouseMove, m_last.x() + (to.x() - m_last.x()) * i / 12, m_last.y() + (to.y() - m_last.y()) * i / 12, Qt::LeftButton, m);
+            m_last = to;
+        } else mouse(QEvent::MouseButtonRelease, num(1), num(2), Qt::LeftButton, m);
+    } else if (cmd == "ndown") {          // ndown <idprefix> <fx> <fy>: press inside a node
+        const QPointF pt = nodePoint(p.value(1), num(2), num(3));
+        mouse(QEvent::MouseMove, pt.x(), pt.y(), Qt::NoButton, {});
+        mouse(QEvent::MouseButtonPress, pt.x(), pt.y(), Qt::LeftButton, {});
+        m_last = pt;
     } else if (cmd == "clip") {           // clip image <file> | clip text <text> | clip files <path>...   (system clipboard, for paste tests)
         auto *md = new QMimeData;
         if (p.value(1) == "image") md->setImageData(QImage(p.value(2)));

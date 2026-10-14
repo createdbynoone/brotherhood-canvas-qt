@@ -10,7 +10,7 @@ QHash<int, QByteArray> EdgeModel::roleNames() const {
     return {{IdRole, "edgeId"}, {X1Role, "x1"}, {Y1Role, "y1"}, {X2Role, "x2"}, {Y2Role, "y2"}, {C1XRole, "c1x"}, {C1YRole, "c1y"},
             {C2XRole, "c2x"}, {C2YRole, "c2y"}, {MidXRole, "midX"}, {MidYRole, "midY"}, {LabelRole, "label"}, {ColorRole, "color"},
             {WidthRole, "strokeWidth"}, {DashedRole, "dashed"}, {ArrowRole, "arrow"}, {SelectedRole, "selected"},
-            {SrcSideRole, "srcSide"}, {DstSideRole, "dstSide"}, {AngleRole, "endAngle"}};
+            {SrcSideRole, "srcSide"}, {DstSideRole, "dstSide"}, {AngleRole, "endAngle"}, {ArrowStartRole, "arrowStart"}, {StartAngleRole, "startAngle"}};
 }
 
 QPointF EdgeModel::anchor(const QRectF &r, const QString &side) {
@@ -59,6 +59,9 @@ EdgeModel::Geo EdgeModel::geoFor(const EdgeData &e) const {
     QPointF d = g.p2 - g.c2;
     if (d.manhattanLength() < 0.01) d = g.p2 - g.p1;
     g.endAngle = qRadiansToDegrees(qAtan2(d.y(), d.x()));
+    QPointF s = g.p1 - g.c1;   // direction the line leaves the source (a head at the start points back along it)
+    if (s.manhattanLength() < 0.01) s = g.p1 - g.p2;
+    g.startAngle = qRadiansToDegrees(qAtan2(s.y(), s.x()));
     g.ok = true;
     return g;
 }
@@ -72,7 +75,8 @@ QVariant EdgeModel::data(const QModelIndex &index, int role) const {
     case ColorRole: return e.data.value("color").toString();
     case WidthRole: return e.data.value("strokeWidth").toDouble(1.5);
     case DashedRole: return e.data.value("dashed").toBool(false) || e.data.value("animated").toBool(false);
-    case ArrowRole: return e.data.value("arrow").toBool(false);
+    case ArrowRole: return e.data.value("arrow").toBool(true);   // heads are on unless switched off
+    case ArrowStartRole: return e.data.value("arrowStart").toBool(false);
     case SelectedRole: return e.id == m_board->selectedEdge();
     case SrcSideRole: return e.sourceHandle;
     case DstSideRole: return e.targetHandle;
@@ -86,6 +90,7 @@ QVariant EdgeModel::data(const QModelIndex &index, int role) const {
     case C2XRole: return g.c2.x(); case C2YRole: return g.c2.y();
     case MidXRole: return g.mid.x(); case MidYRole: return g.mid.y();
     case AngleRole: return g.endAngle;
+    case StartAngleRole: return g.startAngle;
     default: return {};
     }
 }

@@ -58,7 +58,9 @@ Rectangle {
         Sep {}
         Btn { kind: "ghost"; size: "s"; icon: "dots-six"; tip: "Dashed line"; tint: "transparent"; onClicked: board.setEdgeProp(board.selectedEdge, "dashed", root.info.dashed ? null : true); opacity: 1; anchors.verticalCenter: parent.verticalCenter
               Rectangle { anchors.fill: parent; radius: Theme.rControl; color: Theme.accentSoft; visible: root.info.dashed === true; z: -1 } }
-        Btn { kind: "ghost"; size: "s"; icon: "arrow-right"; tip: "Arrow head"; onClicked: board.setEdgeProp(board.selectedEdge, "arrow", root.info.arrow ? null : true); anchors.verticalCenter: parent.verticalCenter
+        Btn { kind: "ghost"; size: "s"; icon: "arrow-left"; tip: "Arrow head at the start"; onClicked: board.setEdgeProp(board.selectedEdge, "arrowStart", !root.info.arrowStart); anchors.verticalCenter: parent.verticalCenter
+              Rectangle { anchors.fill: parent; radius: Theme.rControl; color: Theme.accentSoft; visible: root.info.arrowStart === true; z: -1 } }
+        Btn { kind: "ghost"; size: "s"; icon: "arrow-right"; tip: "Arrow head at the end"; onClicked: board.setEdgeProp(board.selectedEdge, "arrow", !root.info.arrow); anchors.verticalCenter: parent.verticalCenter
               Rectangle { anchors.fill: parent; radius: Theme.rControl; color: Theme.accentSoft; visible: root.info.arrow === true; z: -1 } }
         Btn { kind: "ghost"; size: "s"; icon: "tag"; tip: "Label"; onClicked: root.labelClicked(); anchors.verticalCenter: parent.verticalCenter }
         Sep {}

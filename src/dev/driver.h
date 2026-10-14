@@ -28,4 +28,5 @@ private:
     QStringList m_lines;
     int m_index = 0;
     Qt::MouseButtons m_down;
+    QPointF m_last;
 };

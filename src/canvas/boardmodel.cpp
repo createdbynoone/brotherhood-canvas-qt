@@ -853,5 +853,5 @@ QVariantMap BoardModel::edgeInfo(const QString &id) const {
     const EdgeData &e = m_edges->edges()[r];
     const auto g = m_edges->geoFor(e);
     return {{"id", e.id}, {"label", e.label}, {"color", e.data.value("color").toString()}, {"strokeWidth", e.data.value("strokeWidth").toDouble(1.5)},
-            {"dashed", e.data.value("dashed").toBool(false)}, {"arrow", e.data.value("arrow").toBool(false)}, {"midX", g.mid.x()}, {"midY", g.mid.y()}};
+            {"dashed", e.data.value("dashed").toBool(false)}, {"arrow", e.data.value("arrow").toBool(true)}, {"arrowStart", e.data.value("arrowStart").toBool(false)}, {"midX", g.mid.x()}, {"midY", g.mid.y()}};
 }

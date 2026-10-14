@@ -1,0 +1,18 @@
+# Arrow heads default on, start head toggle, and scroll-pan must not change the zoom.
+eval (app.sidebarOpen = false) + ""
+key f
+wait 700
+eval "zoom0=" + Cam.zoom.toFixed(4)
+wheelrun 700 400 0 -6 400
+wait 200
+eval "after scroll-pan zoom=" + Cam.zoom.toFixed(4) + " pan=" + Math.round(Cam.panX) + "," + Math.round(Cam.panY)
+key f
+wait 700
+eclick 0 0.3
+eval "arrow=" + board.edgeInfo(board.selectedEdge).arrow + " start=" + board.edgeInfo(board.selectedEdge).arrowStart
+eval (board.setEdgeProp(board.selectedEdge, "arrowStart", true), "start on")
+wait 300
+shot $WORK/arrows.png
+eval (board.setEdgeProp(board.selectedEdge, "arrow", false), "end off")
+eval "arrow=" + board.edgeInfo(board.selectedEdge).arrow + " start=" + board.edgeInfo(board.selectedEdge).arrowStart
+quit
