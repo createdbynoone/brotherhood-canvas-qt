@@ -403,7 +403,7 @@ FocusScope {
             if (Date.now() - view.lastPinchMs < 160) { w.accepted = true; return }   // pinch tail: no stray pan
             if ((w.modifiers & Qt.ControlModifier) || (w.modifiers & Qt.MetaModifier)) {
                 const d = w.pixelDelta.y !== 0 ? w.pixelDelta.y * 0.012 : w.angleDelta.y * 0.0016
-                view.zoomAt(w.x, w.y, Math.exp(d))
+                view.zoomAt(w.x, w.y, Math.exp(Math.max(-0.25, Math.min(0.25, d))))
             } else if (w.pixelDelta.x !== 0 || w.pixelDelta.y !== 0) view.panBy(w.pixelDelta.x, w.pixelDelta.y)
             else view.panBy(w.angleDelta.x / 2, w.angleDelta.y / 2)
             w.accepted = true
@@ -412,19 +412,24 @@ FocusScope {
 
     property real lastScrollMs: 0
     property real lastPinchMs: 0
-    PinchHandler {
-        id: pinch
-        target: null
-        property real last: 1
-        property bool engaged: false
-        onActiveChanged: { last = 1; engaged = false }
-        onActiveScaleChanged: {
-            if (!active) return
-            if (Date.now() - view.lastScrollMs < 200 && !engaged) { last = activeScale; return }   // part of a scroll
-            if (!engaged) { if (Math.abs(activeScale - 1) < 0.03) return; engaged = true; last = activeScale }
+    // Pinch arrives from AppKit as magnification deltas (see Mac::installMagnify). It only counts when it is a
+    // deliberate gesture: not part of a scroll, not while a button is down, and past a small dead zone.
+    property real pinchSum: 0
+    property bool pinchOn: false
+    Connections {
+        target: app
+        function onMagnified(x, y, mag, phase) {
+            if (phase & 1) { view.pinchSum = 0; view.pinchOn = false }
+            if ((phase & 24) && !(phase & 6)) { view.pinchOn = false; view.pinchSum = 0; return }
+            if (input.pressed || (!view.pinchOn && Date.now() - view.lastScrollMs < 200)) return
+            if (!view.pinchOn) {
+                view.pinchSum += mag
+                if (Math.abs(view.pinchSum) < 0.04) return
+                view.pinchOn = true; mag = view.pinchSum
+            }
             view.lastPinchMs = Date.now()
-            if (last > 0) view.zoomAt(centroid.position.x, centroid.position.y, activeScale / last)
-            last = activeScale
+            const p = view.mapFromItem(null, x, y)
+            view.zoomAt(p.x, p.y, Math.max(0.8, Math.min(1.25, 1 + mag)))
         }
     }
 

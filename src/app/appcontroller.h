@@ -72,6 +72,7 @@ signals:
     void prefsChanged();
     void keyResult(bool ok, double lockUntil);
     void toast(const QString &message, int kind);
+    void magnified(double x, double y, double magnification, int phase);   // trackpad pinch, window coordinates
 
 private:
     bool m_unlocked = false, m_reduceMotion = false, m_checking = false, m_updating = false;

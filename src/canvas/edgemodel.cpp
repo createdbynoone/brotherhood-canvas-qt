@@ -10,7 +10,7 @@ QHash<int, QByteArray> EdgeModel::roleNames() const {
     return {{IdRole, "edgeId"}, {X1Role, "x1"}, {Y1Role, "y1"}, {X2Role, "x2"}, {Y2Role, "y2"}, {C1XRole, "c1x"}, {C1YRole, "c1y"},
             {C2XRole, "c2x"}, {C2YRole, "c2y"}, {MidXRole, "midX"}, {MidYRole, "midY"}, {LabelRole, "label"}, {ColorRole, "color"},
             {WidthRole, "strokeWidth"}, {DashedRole, "dashed"}, {ArrowRole, "arrow"}, {SelectedRole, "selected"},
-            {SrcSideRole, "srcSide"}, {DstSideRole, "dstSide"}, {AngleRole, "endAngle"}, {ArrowStartRole, "arrowStart"}, {StartAngleRole, "startAngle"}};
+            {SrcSideRole, "srcSide"}, {DstSideRole, "dstSide"}, {AngleRole, "endAngle"}, {ArrowStartRole, "arrowStart"}, {StartAngleRole, "startAngle"}, {EndCountRole, "endCount"}, {EndLeadRole, "endLead"}, {StartCountRole, "startCount"}, {StartLeadRole, "startLead"}};
 }
 
 QPointF EdgeModel::anchor(const QRectF &r, const QString &side) {
@@ -77,6 +77,11 @@ QVariant EdgeModel::data(const QModelIndex &index, int role) const {
     case DashedRole: return e.data.value("dashed").toBool(false) || e.data.value("animated").toBool(false);
     case ArrowRole: return e.data.value("arrow").toBool(true);   // heads are on unless switched off
     case ArrowStartRole: return e.data.value("arrowStart").toBool(false);
+    case EndCountRole: case EndLeadRole: case StartCountRole: case StartLeadRole: {
+        int n = 1; bool lead = true;
+        headGroup(index.row(), role == EndCountRole || role == EndLeadRole, &n, &lead);
+        return (role == EndCountRole || role == StartCountRole) ? QVariant(n) : QVariant(lead);
+    }
     case SelectedRole: return e.id == m_board->selectedEdge();
     case SrcSideRole: return e.sourceHandle;
     case DstSideRole: return e.targetHandle;
@@ -95,6 +100,25 @@ QVariant EdgeModel::data(const QModelIndex &index, int role) const {
     }
 }
 
+void EdgeModel::headGroup(int row, bool atTarget, int *count, bool *lead) const {
+    const EdgeData &me = m_edges[row];
+    const QString &node = atTarget ? me.target : me.source, &side = atTarget ? me.targetHandle : me.sourceHandle;
+    int n = 0; bool first = true;
+    for (int i = 0; i < m_edges.size(); ++i) {
+        const EdgeData &o = m_edges[i];
+        const bool has = atTarget ? o.data.value("arrow").toBool(true) : o.data.value("arrowStart").toBool(false);
+        if (!has || (atTarget ? o.target : o.source) != node || (atTarget ? o.targetHandle : o.sourceHandle) != side) continue;
+        ++n;
+        if (i < row) first = false;
+    }
+    *count = qMax(1, n); *lead = first;
+}
+
+void EdgeModel::refreshHeads() {
+    if (m_edges.isEmpty()) return;
+    emit dataChanged(index(0), index(m_edges.size() - 1), {ArrowRole, ArrowStartRole, EndCountRole, EndLeadRole, StartCountRole, StartLeadRole});
+}
+
 void EdgeModel::reset(const QVector<EdgeData> &e) {
     beginResetModel();
     m_edges = e;
@@ -110,6 +134,7 @@ void EdgeModel::append(const EdgeData &e) {
     beginInsertRows({}, m_edges.size(), m_edges.size());
     m_edges.append(e);
     endInsertRows();
+    refreshHeads();
 }
 
 void EdgeModel::removeAt(int row) {
@@ -117,6 +142,7 @@ void EdgeModel::removeAt(int row) {
     beginRemoveRows({}, row, row);
     m_edges.removeAt(row);
     endRemoveRows();
+    refreshHeads();
 }
 
 void EdgeModel::removeTouching(const QSet<QString> &ids) {
@@ -150,6 +176,7 @@ void EdgeModel::setProp(int row, const QString &key, const QVariant &value) {
     else if (!value.isValid() || value.isNull() || (value.typeId() == QMetaType::QString && value.toString().isEmpty())) e.data.remove(key);
     else e.data[key] = QJsonValue::fromVariant(value);
     emit dataChanged(index(row), index(row));
+    refreshHeads();
 }
 
 bool EdgeModel::exists(const QString &src, const QString &sh, const QString &dst, const QString &dh) const {

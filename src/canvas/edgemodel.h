@@ -15,7 +15,7 @@ class EdgeModel : public QAbstractListModel {
 public:
     enum Roles {
         IdRole = Qt::UserRole + 1, X1Role, Y1Role, X2Role, Y2Role, C1XRole, C1YRole, C2XRole, C2YRole, MidXRole, MidYRole,
-        LabelRole, ColorRole, WidthRole, DashedRole, ArrowRole, SelectedRole, SrcSideRole, DstSideRole, AngleRole, ArrowStartRole, StartAngleRole
+        LabelRole, ColorRole, WidthRole, DashedRole, ArrowRole, SelectedRole, SrcSideRole, DstSideRole, AngleRole, ArrowStartRole, StartAngleRole, EndCountRole, EndLeadRole, StartCountRole, StartLeadRole
     };
     struct Geo { QPointF p1, p2, c1, c2, mid; double endAngle = 0, startAngle = 0; bool ok = false; };
 
@@ -46,6 +46,9 @@ public:
     static QPointF bezier(const QPointF &p1, const QPointF &c1, const QPointF &c2, const QPointF &p2, double t);
 
 private:
+    // Several arrows landing on the same side of the same node share one (larger) head: how many, and who draws it
+    void headGroup(int row, bool atTarget, int *count, bool *lead) const;
+    void refreshHeads();
     BoardModel *m_board;
     QVector<EdgeData> m_edges;
 };

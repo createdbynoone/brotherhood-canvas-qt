@@ -45,6 +45,10 @@ void zoomWindow(QWindow *w);
 /// Custom title bar: a mouse-down for which `isDragPoint(x, y)` (window coordinates, top-left origin) is true
 /// starts a native window drag (double click zooms). The click is taken before Qt sees it.
 void installTitleBarDrag(QWindow *w, std::function<bool(double, double)> isDragPoint);
+/// Trackpad pinch as plain numbers: (window x, window y from the top-left, magnification delta, NSEventPhase).
+/// The events are swallowed so Qt's own touch / native-gesture handling never sees them: Qt Quick's PinchHandler
+/// also reacts to resting fingers and to the magnify noise macOS mixes into scrolls and clicks.
+void installMagnify(QWindow *w, std::function<void(double, double, double, int)> cb);
 void setDarkAppearance();
 void setAccessoryPolicy();                  // no Dock icon, never activates (automated test runs)
 bool reduceMotion();                        // System Settings > Accessibility > Display > Reduce motion

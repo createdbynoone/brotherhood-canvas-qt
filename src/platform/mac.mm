@@ -295,9 +295,29 @@ void installTitleBarDrag(QWindow *w, std::function<bool(double, double)> isDragP
         if (e.window != win) return e;
         const NSPoint p = e.locationInWindow;
         const double x = p.x, y = view.bounds.size.height - p.y;
-        if (y < 0 || y > 120 || !isDragPoint(x, y)) return e;
+        if (y < 0 || y > 120) return e;
+        // the traffic lights are real buttons: a click on them must reach AppKit, never start a window drag
+        for (NSWindowButton kind : {NSWindowCloseButton, NSWindowMiniaturizeButton, NSWindowZoomButton}) {
+            NSButton *b = [win standardWindowButton:kind];
+            if (!b || b.hidden) continue;
+            const NSRect r = NSInsetRect([b convertRect:b.bounds toView:nil], -6, -6);
+            if (NSPointInRect(p, r)) return e;
+        }
+        if (!isDragPoint(x, y)) return e;
         if (e.clickCount == 2) { [win performZoom:nil]; return nil; }
         [win performWindowDragWithEvent:e];
+        return nil;
+    }];
+}
+
+void installMagnify(QWindow *w, std::function<void(double, double, double, int)> cb) {
+    NSView *view = (__bridge NSView *)reinterpret_cast<void *>(w->winId());
+    NSWindow *win = view.window;
+    if (!win) return;
+    [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskMagnify handler:^NSEvent *(NSEvent *e) {
+        if (e.window != win) return e;
+        const NSPoint p = e.locationInWindow;
+        cb(p.x, view.bounds.size.height - p.y, e.magnification, int(e.phase));
         return nil;
     }];
 }

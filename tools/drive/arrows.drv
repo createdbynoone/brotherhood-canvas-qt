@@ -1,18 +1,23 @@
-# Arrow heads default on, start head toggle, and scroll-pan must not change the zoom.
+# Arrow heads default on, start head toggle, scroll-pan and simulated pinch noise must not change the zoom.
 eval (app.sidebarOpen = false) + ""
 key f
 wait 700
 eval "zoom0=" + Cam.zoom.toFixed(4)
 wheelrun 700 400 0 -6 400
 wait 200
-eval "after scroll-pan zoom=" + Cam.zoom.toFixed(4) + " pan=" + Math.round(Cam.panX) + "," + Math.round(Cam.panY)
+eval "after scroll-pan zoom=" + Cam.zoom.toFixed(4)
+eval (app.magnified(700, 400, 0.01, 1), app.magnified(700, 400, 0.01, 4), app.magnified(700, 400, 0.01, 8), "noise") + ""
+eval "after pinch noise zoom=" + Cam.zoom.toFixed(4)
+eval (app.magnified(700, 400, 0.03, 1), app.magnified(700, 400, 0.04, 4), app.magnified(700, 400, 0.05, 4), app.magnified(700, 400, 0, 8), "pinch") + ""
+eval "after real pinch zoom=" + Cam.zoom.toFixed(4)
 key f
 wait 700
 eclick 0 0.3
-eval "arrow=" + board.edgeInfo(board.selectedEdge).arrow + " start=" + board.edgeInfo(board.selectedEdge).arrowStart
 eval (board.setEdgeProp(board.selectedEdge, "arrowStart", true), "start on")
-wait 300
+eval (Cam.zoom = 3, Cam.panX = 720 - board.edgeInfo(board.selectedEdge).midX * 3, Cam.panY = 430 - board.edgeInfo(board.selectedEdge).midY * 3, "zoomed")
+wait 400
 shot $WORK/arrows.png
-eval (board.setEdgeProp(board.selectedEdge, "arrow", false), "end off")
-eval "arrow=" + board.edgeInfo(board.selectedEdge).arrow + " start=" + board.edgeInfo(board.selectedEdge).arrowStart
+eval (board.setEdgeProp(board.selectedEdge, "sourceHandle", "top"), board.setEdgeProp(board.selectedEdge, "targetHandle", "bottom"), "tight curve")
+wait 300
+shot $WORK/arrows2.png
 quit

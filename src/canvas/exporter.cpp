@@ -158,7 +158,7 @@ void drawNode(QPainter &p, const NodeData &n, const Ctx &c) {
     p.restore();
 }
 
-void drawEdge(QPainter &p, const EdgeData &e, const QHash<QString, QRectF> &rects) {
+void drawEdge(QPainter &p, const EdgeData &e, const QHash<QString, QRectF> &rects, const QVector<EdgeData> &all) {
     if (!rects.contains(e.source) || !rects.contains(e.target)) return;
     const QPointF p1 = EdgeModel::anchor(rects[e.source], e.sourceHandle), p2 = EdgeModel::anchor(rects[e.target], e.targetHandle);
     QPointF c1, c2;
@@ -172,20 +172,32 @@ void drawEdge(QPainter &p, const EdgeData &e, const QHash<QString, QRectF> &rect
     path.cubicTo(c1, c2, p2);
     p.setPen(pen); p.setBrush(Qt::NoBrush);
     p.drawPath(path);
-    const auto head = [&](const QPointF &tip, QPointF d, const QPointF &fallback) {
+    // arrows landing on the same side of the same node share one larger head (same rule as the canvas)
+    const auto head = [&](bool atTarget, const QPointF &tip, QPointF d, const QPointF &fallback) {
+        const QString &node = atTarget ? e.target : e.source, &side = atTarget ? e.targetHandle : e.sourceHandle;
+        int n = 0; bool lead = true;
+        for (const auto &o : all) {
+            const bool has = atTarget ? o.data.value("arrow").toBool(true) : o.data.value("arrowStart").toBool(false);
+            if (!has || (atTarget ? o.target : o.source) != node || (atTarget ? o.targetHandle : o.sourceHandle) != side) continue;
+            ++n;
+            if (o.id == e.id) lead = (n == 1);
+        }
+        if (!lead) return;
         if (d.manhattanLength() < 0.01) d = fallback;
-        const double a = qAtan2(d.y(), d.x()), s = 7 + w * 1.6;
+        double a = qAtan2(d.y(), d.x());
+        if (n > 1) a = qDegreesToRadians(side == "left" ? 0.0 : side == "right" ? 180.0 : side == "top" ? 90.0 : 270.0);
+        const double s = (8 + w * 2) * qMin(1.6, 1 + 0.3 * (qMax(n, 1) - 1));
         QPainterPath tri;
         tri.moveTo(tip);
-        tri.lineTo(tip - QPointF(qCos(a - 0.45), qSin(a - 0.45)) * s);
-        tri.lineTo(tip - QPointF(qCos(a) , qSin(a)) * (s * 0.78));
-        tri.lineTo(tip - QPointF(qCos(a + 0.45), qSin(a + 0.45)) * s);
+        tri.lineTo(tip - QPointF(qCos(a) * s - qSin(a) * s * -0.46, qSin(a) * s + qCos(a) * s * -0.46));
+        tri.lineTo(tip - QPointF(qCos(a), qSin(a)) * (s * 0.72));
+        tri.lineTo(tip - QPointF(qCos(a) * s - qSin(a) * s * 0.46, qSin(a) * s + qCos(a) * s * 0.46));
         tri.closeSubpath();
         p.setPen(Qt::NoPen); p.setBrush(col);
         p.drawPath(tri);
     };
-    if (e.data.value("arrow").toBool(true)) head(p2, p2 - c2, p2 - p1);
-    if (e.data.value("arrowStart").toBool(false)) head(p1, p1 - c1, p1 - p2);
+    if (e.data.value("arrow").toBool(true)) head(true, p2, p2 - c2, p2 - p1);
+    if (e.data.value("arrowStart").toBool(false)) head(false, p1, p1 - c1, p1 - p2);
     if (!e.label.isEmpty()) {
         const QPointF m = EdgeModel::bezier(p1, c1, c2, p2, 0.5);
         p.setFont(uiFont(11, QFont::Medium));
@@ -202,7 +214,7 @@ void paintAll(QPainter &p, const QVector<NodeData> &nodes, const QVector<EdgeDat
     QHash<QString, QRectF> rects;
     for (const auto &n : nodes) rects.insert(n.id, QRectF(n.x, n.y, n.w, n.h));
     p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
-    for (const auto &e : edges) drawEdge(p, e, rects);
+    for (const auto &e : edges) drawEdge(p, e, rects, edges);
     for (const auto &n : nodes) drawNode(p, n, c);
 }
 

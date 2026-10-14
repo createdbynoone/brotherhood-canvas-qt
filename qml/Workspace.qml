@@ -193,7 +193,7 @@ Item {
         Hairline { anchors.bottom: parent.bottom; property bool dragThrough: true }
 
         Btn {
-            x: 84; anchors.verticalCenter: parent.verticalCenter
+            x: 76; anchors.verticalCenter: parent.verticalCenter
             kind: "ghost"; size: "m"; icon: "sidebar-simple"; tip: "Boards"; hint: "⌘B"
             onClicked: app.sidebarOpen = !app.sidebarOpen
         }
@@ -218,7 +218,7 @@ Item {
                 onClicked: app.installUpdate()
             }
             Rectangle {
-                width: paletteRow.implicitWidth + 20; height: 28
+                width: paletteRow.implicitWidth + 56; height: 28
                 radius: Theme.rControl
                 color: palHover.hovered ? Theme.elevated : Theme.raised
                 border.color: palHover.hovered ? Theme.hairlineStrong : Theme.hairline
@@ -234,7 +234,6 @@ Item {
                 HoverHandler { id: palHover; cursorShape: Qt.PointingHandCursor }
                 TapHandler { onTapped: ws.openPalette() }
             }
-            Btn { kind: "ghost"; size: "m"; icon: "gear"; tip: "Settings"; hint: "⌘,"; onClicked: settings.open(); anchors.verticalCenter: parent.verticalCenter }
         }
     }
 

@@ -1,0 +1,11 @@
+# Two arrows landing on the same side of one node share a single, larger head.
+eval (app.sidebarOpen = false) + ""
+key f
+wait 700
+eval (board.connectNodes("txtA-0000", "bottom", "note1-0000", "left"), "edges=" + board.edges.rowCount())
+eval (board.connectNodes("txtB-0000", "bottom", "note1-0000", "left"), "edges=" + board.edges.rowCount())
+wait 300
+eval (Cam.zoom = 2.2, Cam.panX = 1000 - board.rectOf("note1-0000").x * 2.2, Cam.panY = 470 - (board.rectOf("note1-0000").y + 60) * 2.2, "zoomed")
+wait 400
+shot $WORK/merge.png
+quit

@@ -195,7 +195,6 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: 3
             spacing: 1
             Txt { width: parent.width; text: canvas.vaultName; variant: "strong"; font.pixelSize: 12; elide: Text.ElideRight }
-            Txt { width: parent.width; text: app.abbreviate(canvas.vaultPath); variant: "caption"; muted: true; elide: Text.ElideMiddle; font.family: Theme.mono; font.pixelSize: 10 }
         }
         Btn { id: gear; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: 3; kind: "ghost"; size: "s"; icon: "gear"; tip: "Settings"; hint: "⌘,"; onClicked: root.settingsClicked() }
     }
