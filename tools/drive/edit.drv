@@ -1,0 +1,34 @@
+# Text editing, new nodes, clipboard.
+eval (app.sidebarOpen = false) + ""
+key f
+wait 700
+ndclick txtA 0.5 0.5
+wait 200
+key a cmd
+type hello world
+wait 700
+key esc
+wait 200
+eval "edited: " + JSON.stringify(board.nodeInfo("txtA-0000").content)
+key n
+wait 300
+type quick note
+key esc
+wait 300
+eval "note created: " + board.selectedType + " " + JSON.stringify(board.nodeInfo(board.selectedId).content)
+key t
+wait 200
+type heading
+key return
+wait 200
+eval "title created: " + board.selectedType
+key c cmd
+move 600 400
+key v cmd
+eval "pasted: nodes=" + board.count
+clip text from the clipboard
+key v cmd
+wait 300
+eval "text paste: " + board.selectedType
+shot $WORK/edit.png
+quit

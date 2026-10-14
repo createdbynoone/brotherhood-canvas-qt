@@ -1,0 +1,26 @@
+# Core gestures on the fixture board. Coordinates are window pixels; n* commands address nodes by id prefix.
+eval (app.sidebarOpen = false) + ""
+key f
+wait 700
+eval "nodes=" + board.count + " edges=" + board.edges.rowCount()
+nclick txtA 0.5 0.5
+eval "select: " + board.selectedCount + " " + board.selectedId.slice(0, 4)
+ndrag txtA 0.5 0.5 80 60
+key z cmd
+eval "undo restores position: x=" + board.rectOf("txtA-0000").x
+ndrag txtA 1 1 60 40
+eval "resize: " + Math.round(board.rectOf("txtA-0000").width) + "x" + Math.round(board.rectOf("txtA-0000").height)
+ndrag txtA 1 0.5 400 0
+eval "connect: edges=" + board.edges.rowCount()
+eclick 0 0.3
+eval "edge selected=" + (board.selectedEdge.length > 0)
+key delete
+eval "edge deleted: edges=" + board.edges.rowCount()
+drag 20 110 1400 800
+eval "marquee: " + board.selectedCount
+eval (board.align("left"), board.tidy(), "arranged")
+key a cmd
+key d cmd
+eval "duplicate: nodes=" + board.count
+shot $WORK/smoke.png
+quit

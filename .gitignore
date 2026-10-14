@@ -1,0 +1,6 @@
+build/
+build-release/
+dist/
+.DS_Store
+# Brand font (licensed): kept local, not committed. The app falls back to Geist Bold when it is missing.
+resources/fonts/Sequel100Black-75.ttf
