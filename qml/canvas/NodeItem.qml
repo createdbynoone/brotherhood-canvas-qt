@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 
 // One self, drawn in world units inside the scaled world layer. It is passive: all pointer input is handled once,
 // in CanvasView, which hit-tests against the model. Chrome (selection ring, grips, connection handles) is sized
@@ -41,7 +42,13 @@ Item {
     readonly property bool isTitle: nodeType === "title"
     readonly property bool isNote: nodeType === "note"
     readonly property bool isMedia: nodeType === "image" || nodeType === "video"
-    readonly property real radiusPx: sRadius >= 0 ? sRadius : (isNote ? 14 : Theme.rCard)
+    readonly property real radiusPx: sRadius >= 0 ? sRadius : (isNote ? 4 : Theme.rCard)
+    // Notes are sticky notes: filled with their colour (or the style fill), ink picked by luminance
+    readonly property color noteFill: sBg.length > 0 ? sBg : noteColor
+    readonly property color noteInk: {
+        const c = Qt.color(noteFill)
+        return (0.299 * c.r + 0.587 * c.g + 0.114 * c.b) > 0.5 ? "#1A1713" : "#F5F1E8"
+    }
     readonly property bool hovered: Cam.hoverId === nodeId && !Cam.connecting
     readonly property bool dropTarget: Cam.connecting && Cam.connectTarget === nodeId
     readonly property bool single: selected && board.selectedCount === 1
@@ -50,24 +57,62 @@ Item {
 
     function primaryAction() { if (nodeType === "video" && body.item && body.item.primaryAction) body.item.primaryAction() }
 
+    // Sticky note: paper with the bottom-right corner folded up (cut corner + the flap), over a soft shadow
+    readonly property real fold: Math.max(8, Math.min(26, width * 0.22, height * 0.3))
+    Shape {
+        visible: self.isNote
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+        ShapePath {   // shadow
+            fillColor: Qt.rgba(0, 0, 0, 0.34); strokeColor: "transparent"
+            startX: 0; startY: 5
+            PathLine { x: self.width; y: 5 }
+            PathLine { x: self.width; y: self.height - self.fold + 5 }
+            PathLine { x: self.width - self.fold; y: self.height + 5 }
+            PathLine { x: 0; y: self.height + 5 }
+        }
+        ShapePath {   // paper
+            fillColor: self.noteFill; strokeColor: self.sBorder.length > 0 ? self.sBorder : "transparent"
+            strokeWidth: self.sBorder.length > 0 ? (self.sBorderW >= 0 ? self.sBorderW : 1) : 0
+            startX: 0; startY: 0
+            PathLine { x: self.width; y: 0 }
+            PathLine { x: self.width; y: self.height - self.fold }
+            PathLine { x: self.width - self.fold; y: self.height }
+            PathLine { x: 0; y: self.height }
+            PathLine { x: 0; y: 0 }
+        }
+        ShapePath {   // the lifted flap: the paper's lighter back
+            fillGradient: LinearGradient {
+                x1: self.width - self.fold; y1: self.height - self.fold; x2: self.width; y2: self.height
+                GradientStop { position: 0; color: Qt.rgba(1, 1, 1, 0.34) }
+                GradientStop { position: 1; color: Qt.rgba(1, 1, 1, 0.08) }
+            }
+            strokeColor: "transparent"
+            startX: self.width; startY: self.height - self.fold
+            PathLine { x: self.width - self.fold; y: self.height }
+            PathLine { x: self.width - self.fold; y: self.height - self.fold }
+            PathLine { x: self.width; y: self.height - self.fold }
+        }
+    }
     // Fill
     Rectangle {
-        visible: !self.isTitle
+        visible: !self.isTitle && !self.isNote
         anchors.fill: parent
         radius: self.radiusPx
         color: self.sBg.length > 0 ? self.sBg
-             : self.isNote ? Theme.alpha(Theme.raised, 0.92)
              : self.nodeType === "image" ? "transparent"
              : self.nodeType === "video" ? Theme.raised
              : Theme.surface
     }
-    // Note colour strip
+    // Tape-like highlight along the top edge of the paper
     Rectangle {
         visible: self.isNote
-        x: self.radiusPx * 0.35; y: 0
-        width: parent.width - self.radiusPx * 0.7; height: 3
-        radius: 1.5
-        color: self.noteColor
+        x: 0; y: 0; width: parent.width; height: Math.min(parent.height, 26)
+        radius: self.radiusPx
+        gradient: Gradient {
+            GradientStop { position: 0; color: Qt.rgba(1, 1, 1, 0.14) }
+            GradientStop { position: 1; color: Qt.rgba(1, 1, 1, 0) }
+        }
     }
 
     Loader {
@@ -95,7 +140,7 @@ Item {
             delegate: Rectangle {
                 required property int index
                 width: parent.width * (index === 0 ? 0.55 : index === 3 ? 0.4 : 0.9); height: 6; radius: 3
-                color: Theme.alpha(Theme.text, index === 0 ? 0.30 : 0.14)
+                color: Theme.alpha(self.isNote ? self.noteInk : Theme.text, index === 0 ? 0.30 : 0.14)
             }
         }
     }
@@ -123,18 +168,18 @@ Item {
         visible: self.isNote && self.label.length > 0
         x: 14; y: 8; width: parent.width - 28
         text: self.label; variant: "overline"; font.pixelSize: 10
-        color: self.noteColor; elide: Text.ElideRight; renderType: Text.QtRendering
+        color: self.noteInk; opacity: 0.6; elide: Text.ElideRight; renderType: Text.QtRendering
     }
 
     // Border over the content
     Rectangle {
-        visible: !self.isTitle
+        visible: !self.isTitle && !self.isNote
         anchors.fill: parent
         radius: self.radiusPx
         color: "transparent"
         border.width: self.sBorderW >= 0 ? self.sBorderW : 1
         border.color: self.sBorder.length > 0 ? self.sBorder
-                    : self.isNote ? Theme.alpha(self.noteColor, 0.30)
+                    : self.isNote ? Qt.rgba(0, 0, 0, 0.16)
                     : self.hovered || self.dropTarget ? Theme.hairlineStrong : Theme.alpha(Qt.rgba(1, 1, 1, 1), 0.11)
     }
     // Everything that needs the live zoom lives in a loader that exists only for the selected / hovered node

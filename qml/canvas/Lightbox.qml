@@ -42,7 +42,7 @@ Item {
             asynchronous: true; mipmap: true; smooth: true
             source: root.open && !root.isVideo && root.info.filePath ? "image://media/" + encodeURIComponent(root.info.filePath) + "?s=4096" : ""
             transformOrigin: Item.Center
-            Behavior on scale { enabled: !wheel.active; NumberAnimation { duration: Theme.fast } }
+            Behavior on scale { enabled: !wheel.active && !root.pinching; NumberAnimation { duration: Theme.fast } }
         }
         MouseArea {
             id: wheel
@@ -53,6 +53,23 @@ Item {
             onDoubleClicked: { pic.scale = pic.scale > 1.05 ? 1 : 2.5; pic.x = 0; pic.y = 0 }
         }
     }
+
+    // Pinch comes from AppKit (Mac::installMagnify), not from the MouseArea: zoom the picture, never the board behind
+    property real pinchSum: 0
+    Connections {
+        target: app
+        function onMagnified(x, y, mag, phase) {
+            if (!root.open || root.isVideo) return
+            if (phase & 1) root.pinchSum = 0
+            if ((phase & 24) && !(phase & 6)) { root.pinchSum = 0; root.pinching = false; return }
+            root.pinchSum += mag
+            if (Math.abs(root.pinchSum) < 0.02 && !root.pinching) return
+            root.pinching = true
+            pic.scale = Math.max(0.5, Math.min(8, pic.scale * Math.max(0.8, Math.min(1.25, 1 + mag))))
+        }
+    }
+    property bool pinching: false
+    onOpenChanged: { pinching = false; pinchSum = 0 }
 
     // Video
     MediaPlayer {

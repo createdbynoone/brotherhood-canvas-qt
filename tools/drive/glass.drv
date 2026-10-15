@@ -1,0 +1,15 @@
+# Sidebar glass over content, and the lightbox keeping a pinch to itself.
+key f
+wait 600
+eval (Cam.panX = Cam.panX - 380, "panned") + ""
+wait 500
+shot $WORK/glass.png
+eval "zoom before=" + Cam.zoom.toFixed(3)
+ndclick img00 0.5 0.5
+wait 700
+eval "lightbox open? selected=" + board.selectedId
+eval (app.magnified(700, 400, 0.3, 1), app.magnified(700, 400, 0.3, 2), "pinch sent") + ""
+wait 300
+eval "zoom after (board must stay 0.800)=" + Cam.zoom.toFixed(3)
+shot $WORK/lightbox.png
+quit

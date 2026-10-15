@@ -1,0 +1,7 @@
+key f
+wait 700
+shot $WORK/t1.png
+eval (app.sidebarOpen = false) + ""
+wait 800
+shot $WORK/t2.png
+quit

@@ -64,16 +64,20 @@ void drawMarkdown(QPainter &p, const QRectF &r, const QString &md, const QColor 
 void drawNode(QPainter &p, const NodeData &n, const Ctx &c) {
     const QRectF r(n.x, n.y, n.w, n.h);
     const QJsonObject st = n.data.value("nodeStyle").toObject();
-    const double radius = st.contains("borderRadius") ? st["borderRadius"].toDouble() : (n.type == "note" ? 14 : 12);
+    const double radius = st.contains("borderRadius") ? st["borderRadius"].toDouble() : (n.type == "note" ? 4 : 12);
     const double opacity = st.contains("opacity") ? st["opacity"].toDouble() : 1.0;
     const QString noteColor = n.data.value("noteColor").toString("#F54F1B");
     QColor border = st.contains("borderColor") ? QColor(st["borderColor"].toString()) : QColor(255, 255, 255, 36);
-    if (n.type == "note" && !st.contains("borderColor")) { border = QColor(noteColor); border.setAlphaF(0.35); }
+    if (n.type == "note" && !st.contains("borderColor")) border = QColor(0, 0, 0, 41);
     const double bw = st.contains("borderWidth") ? st["borderWidth"].toDouble() : 1.0;
     p.save();
     p.setOpacity(opacity);
     QPainterPath clip;
-    clip.addRoundedRect(r, radius, radius);
+    const double fold = qMax(8.0, qMin(26.0, qMin(double(n.w) * 0.22, double(n.h) * 0.3)));
+    if (n.type == "note") {        // sticky note: bottom-right corner folded up
+        clip.moveTo(r.topLeft()); clip.lineTo(r.topRight()); clip.lineTo(r.right(), r.bottom() - fold);
+        clip.lineTo(r.right() - fold, r.bottom()); clip.lineTo(r.bottomLeft()); clip.closeSubpath();
+    } else clip.addRoundedRect(r, radius, radius);
 
     if (n.type == "title") {
         p.restore();
@@ -90,7 +94,7 @@ void drawNode(QPainter &p, const NodeData &n, const Ctx &c) {
     }
 
     // body
-    QColor bg = st.contains("backgroundColor") ? QColor(st["backgroundColor"].toString()) : (n.type == "note" ? QColor(23, 23, 22, 235) : kSurface);
+    QColor bg = st.contains("backgroundColor") ? QColor(st["backgroundColor"].toString()) : (n.type == "note" ? QColor(noteColor) : kSurface);
     if (n.type == "image" && !st.contains("backgroundColor")) bg = Qt::transparent;
     p.setPen(Qt::NoPen);
     p.setBrush(bg);
@@ -133,12 +137,13 @@ void drawNode(QPainter &p, const NodeData &n, const Ctx &c) {
         p.drawText(QRectF(body.left() + 12, body.bottom() - 40, body.width() - 24, 20), Qt::AlignLeft | Qt::AlignVCenter, QFontMetricsF(uiFont(12, QFont::Medium)).elidedText(n.data.value("fileName").toString(), Qt::ElideMiddle, body.width() - 24));
     } else {            // text, note
         QRectF inner = body.adjusted(14, 12, -14, -12);
+        QColor ink = kText;
         if (n.type == "note") {
-            p.setPen(Qt::NoPen); p.setBrush(QColor(noteColor));
-            p.drawRect(QRectF(r.left(), r.top(), r.width(), 3));
+            const QColor f = bg;
+            ink = (0.299 * f.redF() + 0.587 * f.greenF() + 0.114 * f.blueF()) > 0.5 ? QColor("#1A1713") : QColor("#F5F1E8");
             inner = body.adjusted(14, 15, -14, -12);
         }
-        drawMarkdown(p, inner, n.data.value("content").toString(), kText, 13);
+        drawMarkdown(p, inner, n.data.value("content").toString(), ink, 13);
     }
     if (strip > 0) {
         p.setPen(Qt::NoPen); p.setBrush(QColor(11, 11, 10, 217));
@@ -150,7 +155,13 @@ void drawNode(QPainter &p, const NodeData &n, const Ctx &c) {
         p.drawText(QRectF(r.left() + 10, r.bottom() - strip, r.width() - 20, strip), Qt::AlignLeft | Qt::AlignVCenter, label);
     }
     p.setClipping(false);
-    if (bw > 0) {
+    if (n.type == "note") {
+        QPainterPath flap;
+        flap.moveTo(r.right(), r.bottom() - fold); flap.lineTo(r.right() - fold, r.bottom()); flap.lineTo(r.right() - fold, r.bottom() - fold); flap.closeSubpath();
+        p.setPen(Qt::NoPen); p.setBrush(QColor(255, 255, 255, 56));
+        p.drawPath(flap);
+        if (st.contains("borderColor") && bw > 0) { p.setBrush(Qt::NoBrush); p.setPen(QPen(border, bw)); p.drawPath(clip); }
+    } else if (bw > 0) {
         p.setBrush(Qt::NoBrush);
         p.setPen(QPen(border, bw));
         p.drawRoundedRect(r.adjusted(bw / 2, bw / 2, -bw / 2, -bw / 2), radius, radius);

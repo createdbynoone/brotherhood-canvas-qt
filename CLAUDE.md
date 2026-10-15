@@ -67,3 +67,12 @@ tools/         release.sh, prune_bundle.sh, dev-test.sh, make_fixture.py, drive/
 - **Punta compartida**: varias flechas al mismo lado del mismo nodo (`EdgeModel::headGroup`, roles `endCount/endLead/startCount/startLead`) dibujan UNA punta (+30 % por flecha, tope 1.6×) apuntando por la normal del lado; las líneas llegan por su eje (`q[2]` alineado) y se juntan. El exportador (`exporter.cpp`) aplica la misma regla.
 - Pruebas: `tools/drive/arrows.drv` (flechas, scroll/pellizco simulado con `app.magnified`) y `merge.drv` (punta compartida); `eval` no admite variables globales nuevas (usar expresiones sin asignar).
 - Barra superior: sin engranaje (queda el de la barra lateral, ⌘, y la paleta); Search más ancho; la barra lateral no muestra la ruta del vault.
+
+## Ajustes post 2.1.1 (sin publicar)
+- **Paleta**: naranja se queda; azul→morado `#8B5CF6`, verde→lima `#B7E43C`, rojo→borgoña `#9B2243` (Theme `noteColors/edgeColors/presets`, `ColorField.swatches`). Los colores ya guardados en boards no se tocan.
+- **Sidebar de cristal**: `Sidebar.qml` copia `InspectorOverlay` de Studio (`ShaderEffectSource` del `CanvasView` + `MultiEffect` con máscara + tinte 0.72). `blurSource: cv` en `Workspace`.
+- **Lightbox**: el pellizco llega por `app.magnified` (monitor global), no por el MouseArea; `CanvasView.blocked` (= `lightbox.open`) lo ignora y `Lightbox` lo aplica a la imagen.
+- **Notas = sticky notes**: relleno del color de la nota (o `sBg`), tinta por luminancia (`NodeItem.noteInk`), sombra, radio 4. Los `# títulos` de una nota se dibujan en Niceplan MAYÚSCULAS (`TextContent.segments`). `resources/fonts/Niceplan.ttf` NO va en git (licencia, está en .gitignore); sin ella cae a Geist Bold. El exportador usa el mismo relleno/tinta (sin Niceplan).
+- **Edición con ✓ / ✕**: `EditBar.qml` flota sobre el nodo en edición (`Cam.editAccept/editCancel`); `TextContent`/`TitleContent` guardan `original` y `cancel()` lo restaura. `InlineEditor` (etiquetas) lleva sus propios ✓/✕. Esc y clic fuera siguen confirmando.
+- Pruebas: `tools/drive/sticky.drv` (notas + cancelar) y `glass.drv` (cristal + pellizco en el visor).
+- **Toggle del sidebar**: botón redondo de 40 px centrado en vertical que viaja con el borde del panel (como el del inspector de Studio); ya no hay botón en la barra superior. Sticky notes con la esquina inferior derecha doblada (`NodeItem` Shape + exportador).

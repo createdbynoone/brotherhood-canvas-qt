@@ -1,0 +1,19 @@
+# Sticky notes (marker headings), glass sidebar, floating accept / cancel bar while editing.
+eval (board.addNode("note", 700, 80, 260, 200), "added") + ""
+eval (board.setNodeData(board.selectedId, "content", "# Ideas\n\nBuy **paper**\n\n## Lista\n- one\n- two"), board.setNodeData(board.selectedId, "noteColor", "#E8B547"), "set") + ""
+eval (board.addNode("note", 1000, 80, 240, 160), "added2") + ""
+eval (board.setNodeData(board.selectedId, "content", "### Morado\nhola mundo"), board.setNodeData(board.selectedId, "noteColor", "#8B5CF6"), "set2") + ""
+eval (board.addNode("note", 700, 330, 240, 160), "added3") + ""
+eval (board.setNodeData(board.selectedId, "content", "# Burgundy"), board.setNodeData(board.selectedId, "noteColor", "#9B2243"), "set3") + ""
+key f
+wait 800
+shot $WORK/sticky1.png
+eval (board.editingId = board.selectedId, "editing") + ""
+wait 400
+shot $WORK/sticky2.png
+type zz
+eval "typed: " + JSON.stringify(board.nodeInfo(board.selectedId).content)
+eval (Cam.editCancel(), "cancelled") + ""
+wait 300
+eval "after cancel: " + JSON.stringify(board.nodeInfo(board.selectedId).content) + " editing=" + board.editingId
+quit

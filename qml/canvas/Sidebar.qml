@@ -1,13 +1,55 @@
 import QtQuick
 import QtQuick.Controls.Basic
+import QtQuick.Effects
 
 // Boards of the open vault: search, create, rename (double click), reorder (drag), delete.
-Rectangle {
+// Glass like Studio's inspector: a blurred copy of the canvas behind it plus a tint that keeps text readable.
+Item {
     id: root
     signal settingsClicked()
-    color: Theme.surface
-    radius: Theme.rPanel
-    border.color: Theme.hairlineStrong
+    property Item blurSource: null          // the canvas whose pixels are blurred behind the panel
+
+    ShaderEffectSource {
+        id: backdrop
+        anchors.fill: parent
+        sourceItem: root.blurSource
+        sourceRect: root.blurSource ? Qt.rect(root.x - root.blurSource.x, root.y - root.blurSource.y, root.width, root.height) : Qt.rect(0, 0, 0, 0)
+        visible: false
+        live: root.visible && root.x > -root.width
+    }
+    MultiEffect {
+        anchors.fill: parent
+        visible: root.blurSource !== null
+        source: backdrop
+        autoPaddingEnabled: false
+        blurEnabled: true
+        blurMax: 48
+        blur: 1.0
+        maskEnabled: true
+        maskSource: maskShape
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
+    }
+    Rectangle {
+        id: maskShape
+        anchors.fill: parent
+        radius: Theme.rPanel
+        layer.enabled: true
+        visible: false
+    }
+    Rectangle {
+        anchors.fill: parent
+        radius: Theme.rPanel
+        color: Theme.alpha(Theme.surface, root.blurSource ? 0.72 : 1)
+        border.color: Theme.hairlineStrong
+    }
+    Rectangle {   // the glass edge
+        anchors.fill: parent
+        anchors.margins: 1
+        radius: Theme.rPanel
+        color: "transparent"
+        border.color: Qt.rgba(1, 1, 1, 0.06)
+    }
 
     MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons; onWheel: w => w.accepted = true }   // the sidebar floats over the canvas: swallow input
 
@@ -188,7 +230,6 @@ Rectangle {
         anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
         anchors.margins: 12
         height: 44
-        Hairline { anchors.top: parent.top }
         Icon { name: "vault"; size: 18; color: Theme.textDim; anchors.left: parent.left; anchors.leftMargin: 2; anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: 3 }
         Column {
             anchors.left: parent.left; anchors.leftMargin: 28; anchors.right: gear.left; anchors.rightMargin: 6

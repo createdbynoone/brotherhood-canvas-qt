@@ -45,10 +45,17 @@ Item {
                 selectedTextColor: Theme.text
                 selectByMouse: true
                 renderType: Text.QtRendering
-                Component.onCompleted: { text = node.content; board.beginGesture(); forceActiveFocus(); selectAll() }
+                Component.onCompleted: { original = node.content; text = node.content; board.beginGesture(); forceActiveFocus(); selectAll() }
                 Component.onDestruction: board.endGesture()
                 onTextChanged: if (activeFocus) save.restart()
                 Timer { id: save; interval: 500; onTriggered: board.setNodeData(node.nodeId, "content", ed.text) }
+                property string original: ""
+                function cancel() {
+                    save.stop()
+                    if (node.content !== original) board.setNodeData(node.nodeId, "content", original)
+                    board.editingId = ""
+                    Cam.focusRequested()
+                }
                 function finish() {
                     save.stop()
                     board.setNodeData(node.nodeId, "content", ed.text)
@@ -59,6 +66,7 @@ Item {
                 Keys.onReturnPressed: finish()
                 Keys.onEnterPressed: finish()
                 onActiveFocusChanged: if (!activeFocus && node.editing) finish()
+                Connections { target: Cam; function onEditAccept() { ed.finish() } function onEditCancel() { ed.cancel() } }
             }
         }
     }

@@ -21,7 +21,7 @@ def node(i, t, x, y, w, h, data):
     nodes.append({"id": i, "type": t, "position": {"x": x, "y": y}, "width": w, "height": h, "data": data})
 node("ttl01-0000", "title", 0, -140, 500, 80, {"content": "FIXTURE BOARD", "fontSize": 40})
 node("txtA-0000", "text", 0, 0, 260, 180, {"content": "# Card A\n\nFirst **text** card\n- one\n- two"})
-node("txtB-0000", "text", 420, 0, 260, 180, {"content": "# Card B\n\nSecond card", "nodeStyle": {"backgroundColor": "#1A1A2E", "borderColor": "#4B8EFF", "borderWidth": 2}})
+node("txtB-0000", "text", 420, 0, 260, 180, {"content": "# Card B\n\nSecond card", "nodeStyle": {"backgroundColor": "#1D1530", "borderColor": "#4B8EFF", "borderWidth": 2}})
 node("note1-0000", "note", 840, 0, 220, 180, {"content": "# Note\n\nA note", "noteColor": "#F54F1B"})
 for n in range(3):
     f = "00000000000000%02d.png" % n

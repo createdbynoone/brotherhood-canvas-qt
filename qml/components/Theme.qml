@@ -51,6 +51,8 @@ QtObject {
     readonly property string mono: "Geist Mono"
     property string brand: ""             // Sequel 100 Black 75, set from Main.qml when the font is bundled
     // Titles (pane, card, section, mode switch, primary buttons): brand face, uppercase, no tracking
+    property string marker: ""            // Niceplan (marker pen), set from Main.qml when bundled: note headings
+    readonly property string markerFamily: marker.length > 0 ? marker : sans
     readonly property string headingFamily: brand.length > 0 ? brand : sans
     readonly property int headingWeight: brand.length > 0 ? Font.Normal : Font.Bold
 
@@ -64,13 +66,13 @@ QtObject {
     readonly property var curveLayout: [0.22, 1, 0.36, 1, 1, 1]      // ease-out-quint: panes glide, never snap
 
     // Canvas: note colours and node style presets (user data keeps whatever colour it was saved with)
-    readonly property var noteColors: ["#F54F1B", "#E8B547", "#4B8EFF", "#8AE05A", "#E05A5A", "#9B8AE0", "#5AC8E0", "#F0EBE0"]
-    readonly property var edgeColors: ["", "#F54F1B", "#E8B547", "#4B8EFF", "#8AE05A", "#E05A5A", "#9B8AE0", "#F0EBE0"]
+    readonly property var noteColors: ["#F54F1B", "#E8B547", "#8B5CF6", "#B7E43C", "#9B2243", "#9B8AE0", "#5AC8E0", "#F0EBE0"]
+    readonly property var edgeColors: ["", "#F54F1B", "#E8B547", "#8B5CF6", "#B7E43C", "#9B2243", "#9B8AE0", "#F0EBE0"]
     readonly property var presets: [
         { label: "Accent", bg: "#1C100C", border: "#F54F1B" },
-        { label: "Blue", bg: "#1A1A2E", border: "#4B8EFF" },
-        { label: "Green", bg: "#1A2E1A", border: "#8AE05A" },
-        { label: "Red", bg: "#2E1A1A", border: "#E05A5A" },
+        { label: "Purple", bg: "#1D1530", border: "#8B5CF6" },
+        { label: "Lime", bg: "#232A10", border: "#B7E43C" },
+        { label: "Burgundy", bg: "#2A1118", border: "#9B2243" },
         { label: "Dark", bg: "#0B0B0A", border: "#2A2A28" },
         { label: "Ghost", bg: "transparent", border: "#3A3936" }
     ]

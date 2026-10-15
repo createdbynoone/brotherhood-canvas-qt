@@ -89,6 +89,7 @@ Item {
         id: cv
         anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
         anchors.top: titleBar.bottom
+        blocked: lightbox.open
         onStyleRequested: ws.styleOpen = !ws.styleOpen
         onPreviewRequested: id => lightbox.show(id)
         onContextRequested: info => ws.showMenu(info)
@@ -157,6 +158,7 @@ Item {
     Sidebar {
         id: sidebar
         z: 10
+        blurSource: cv
         width: 264
         x: app.sidebarOpen ? 12 : -width - 24
         y: titleBar.height + 12
@@ -176,6 +178,25 @@ Item {
         anchors.right: parent.right; anchors.rightMargin: 16
         anchors.bottom: parent.bottom; anchors.bottomMargin: 16
     }
+    // Round toggle on the sidebar's edge, vertically centred; it rides along with the panel (as Studio's inspector does)
+    Rectangle {
+        id: sideToggle
+        z: 11
+        width: 40; height: 40; radius: 20
+        x: Math.max(16, sidebar.x + sidebar.width + 12)
+        y: titleBar.height + (parent.height - titleBar.height - height) / 2
+        color: sideHover.hovered ? Theme.elevated : Theme.alpha(Theme.surface, 0.9)
+        border.color: Theme.hairlineStrong
+        Icon {
+            anchors.centerIn: parent
+            name: "caret-left"; weight: "bold"; size: 13
+            color: sideHover.hovered ? Theme.text : Theme.textDim
+            rotation: app.sidebarOpen ? 0 : 180
+            Behavior on rotation { NumberAnimation { duration: Theme.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.curveLayout } }
+        }
+        HoverHandler { id: sideHover; cursorShape: Qt.PointingHandCursor }
+        MouseArea { anchors.fill: parent; onClicked: app.sidebarOpen = !app.sidebarOpen }
+    }
     StylePanel {
         id: stylePanel
         visible: ws.styleOpen && board.selectedCount === 1
@@ -192,11 +213,6 @@ Item {
         z: 20
         Hairline { anchors.bottom: parent.bottom; property bool dragThrough: true }
 
-        Btn {
-            x: 76; anchors.verticalCenter: parent.verticalCenter
-            kind: "ghost"; size: "m"; icon: "sidebar-simple"; tip: "Boards"; hint: "⌘B"
-            onClicked: app.sidebarOpen = !app.sidebarOpen
-        }
         Row {
             property bool dragThrough: true
             anchors.centerIn: parent

@@ -23,6 +23,8 @@ QtObject {
     property string connectFrom: ""
     property string connectTarget: ""     // node the connection would land on
     signal focusRequested()
+    signal editAccept()                        // the floating check button: keep what was typed
+    signal editCancel()                        // the floating x button: drop it
     signal doubleClicked(real x, real y)       // canvas coordinates; the test driver raises it, real input comes from MouseArea
 
     // Culling uses a padded rectangle that is only recomputed when the view nears its edge, so a pan or zoom does not

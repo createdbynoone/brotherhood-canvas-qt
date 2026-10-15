@@ -7,7 +7,7 @@ Item {
     id: root
     property string value: ""            // "#RRGGBB" or "" for unset
     property string fallback: "#141414"  // shown when unset
-    property var swatches: ["#0B0B0A", "#141414", "#1C100C", "#1A1A2E", "#1A2E1A", "#2E1A1A", "#F54F1B", "#E8B547", "#4B8EFF", "#8AE05A", "#E05A5A", "#9B8AE0", "#5AC8E0", "#F0EBE0", "#6B6A66", "#FFFFFF"]
+    property var swatches: ["#0B0B0A", "#141414", "#1C100C", "#1D1530", "#232A10", "#2A1118", "#F54F1B", "#E8B547", "#8B5CF6", "#B7E43C", "#9B2243", "#9B8AE0", "#5AC8E0", "#F0EBE0", "#6B6A66", "#FFFFFF"]
     property bool allowClear: true
     signal picked(string hex)            // "" clears
     implicitHeight: 30

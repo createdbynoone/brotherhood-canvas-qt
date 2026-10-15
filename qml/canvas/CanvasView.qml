@@ -191,6 +191,7 @@ FocusScope {
         shown: board.selectedEdge !== "" && !view.interacting
         onLabelClicked: view.editEdgeLabel(board.selectedEdge)
     }
+    EditBar { z: 8 }
     InlineEditor {
         id: labelEditor
         z: 8
@@ -410,6 +411,7 @@ FocusScope {
         }
     }
 
+    property bool blocked: false             // set while the lightbox is open
     property real lastScrollMs: 0
     property real lastPinchMs: 0
     // Pinch arrives from AppKit as magnification deltas (see Mac::installMagnify). It only counts when it is a
@@ -419,6 +421,7 @@ FocusScope {
     Connections {
         target: app
         function onMagnified(x, y, mag, phase) {
+            if (view.blocked) return          // a viewer (lightbox) is open: the pinch belongs to it
             if (phase & 1) { view.pinchSum = 0; view.pinchOn = false }
             if ((phase & 24) && !(phase & 6)) { view.pinchOn = false; view.pinchSum = 0; return }
             if (input.pressed || (!view.pinchOn && Date.now() - view.lastScrollMs < 200)) return

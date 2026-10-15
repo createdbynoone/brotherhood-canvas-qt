@@ -42,7 +42,7 @@ ApplicationWindow {
         if (!splashDone || !app.unlocked || canvas.state !== "ready") return y < 92
         return workspace.item ? workspace.item.dragAt(x, y) : false
     }
-    Component.onCompleted: { Theme.reduceMotion = app.reduceMotion; Theme.brand = brandFamily }
+    Component.onCompleted: { Theme.reduceMotion = app.reduceMotion; Theme.brand = brandFamily; Theme.marker = markerFamily }
 
     Loader {
         id: workspace

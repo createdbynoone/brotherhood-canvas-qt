@@ -54,6 +54,10 @@ int main(int argc, char *argv[]) {
     const int brandId = QFontDatabase::addApplicationFont(QStringLiteral(":/assets/fonts/Sequel100Black-75.ttf"));
     if (brandId >= 0) brandFamily = QFontDatabase::applicationFontFamilies(brandId).value(0);
     app.setProperty("brandFamily", brandFamily);
+    // Marker face for note headings (Niceplan): optional too
+    QString markerFamily;
+    const int markerId = QFontDatabase::addApplicationFont(QStringLiteral(":/assets/fonts/Niceplan.ttf"));
+    if (markerId >= 0) markerFamily = QFontDatabase::applicationFontFamilies(markerId).value(0);
     QGuiApplication::setFont(QFont("Geist", 13));
 
     AppController appCtl;
@@ -68,6 +72,7 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("grabSize", cli.value(size));
     engine.rootContext()->setContextProperty("sizeForced", cli.isSet(size) || cli.isSet(grab));
     engine.rootContext()->setContextProperty("brandFamily", brandFamily);
+    engine.rootContext()->setContextProperty("markerFamily", markerFamily);
     engine.rootContext()->setContextProperty("startOpen", cli.value(openOpt));
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);
