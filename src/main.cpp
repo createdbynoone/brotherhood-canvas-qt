@@ -21,6 +21,9 @@
 int main(int argc, char *argv[]) {
     // Interface scale (Settings > Interface): Qt only reads QT_SCALE_FACTOR at startup, so it is applied here, before
     // the application exists. A value set in the environment (tests) wins.
+    // A relaunch from this app inherits the previous run's environment (`open` passes it on), including the
+    // QT_SCALE_FACTOR we set ourselves: drop it, or the old scale would beat the one just chosen in Settings.
+    if (qEnvironmentVariableIsSet("BCQ_SCALE_APPLIED")) { qunsetenv("QT_SCALE_FACTOR"); qunsetenv("BCQ_SCALE_APPLIED"); }
     const int scalePct = qBound(50, int(Prefs::ownNumber("uiScale", 100)), 100);
     if (!qEnvironmentVariableIsSet("QT_SCALE_FACTOR") && scalePct != 100) qputenv("QT_SCALE_FACTOR", QByteArray::number(scalePct / 100.0));
     qputenv("BCQ_SCALE_APPLIED", QByteArray::number(qEnvironmentVariableIsSet("QT_SCALE_FACTOR") ? int(qEnvironmentVariable("QT_SCALE_FACTOR").toDouble() * 100 + 0.5) : 100));
