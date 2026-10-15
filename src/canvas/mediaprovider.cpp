@@ -18,7 +18,7 @@ namespace {
 
 QMutex gMutex;
 QString gRoot;
-QCache<QString, QImage> gCache(192 * 1024 * 1024);      // cost = bytes
+QCache<QString, QImage> gCache(128 * 1024 * 1024);      // cost = bytes
 
 QImage cached(const QString &key) {
     QMutexLocker l(&gMutex);
@@ -69,6 +69,8 @@ private:
 }  // namespace
 
 MediaProvider::MediaProvider() { m_pool.setMaxThreadCount(qMax(2, QThread::idealThreadCount() - 2)); }
+
+void MediaProvider::dropCache() { QMutexLocker l(&gMutex); gCache.clear(); }
 
 void MediaProvider::setRoot(const QString &vaultPath) {
     QMutexLocker l(&gMutex);

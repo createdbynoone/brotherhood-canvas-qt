@@ -19,6 +19,7 @@ set(APP_SOURCES
     src/core/prefs.cpp
     src/core/lock.cpp
     src/platform/mac.mm
+    src/platform/memtrim.cpp
     src/canvas/boarddata.cpp
     src/canvas/vault.cpp
     src/canvas/edgemodel.cpp

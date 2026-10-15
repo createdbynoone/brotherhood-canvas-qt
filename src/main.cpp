@@ -13,6 +13,7 @@
 #include "core/lock.h"
 #include "core/prefs.h"
 #include "platform/mac.h"
+#include "platform/memtrim.h"
 #ifdef BCQ_DEV
 #include "dev/driver.h"
 #endif
@@ -99,6 +100,10 @@ int main(int argc, char *argv[]) {
             return hit.toBool();
         });
     });
+
+    // Gives memory back while the app sits in the background (see memtrim.h). BCQ_TRIM_NOW=1: trim once, 8 s after start (tests)
+    auto *memTrim = new MemTrim(&engine, window, [] { MediaProvider::dropCache(); }, &app);
+    if (qEnvironmentVariableIntValue("BCQ_TRIM_NOW") > 0) QTimer::singleShot(8000, memTrim, [memTrim] { memTrim->trim(true); });
 
     canvas.start();
     if (cli.isSet(boardOpt)) {
