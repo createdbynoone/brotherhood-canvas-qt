@@ -14,8 +14,8 @@
 // Only salt and hash live in the code, never the passphrase.
 namespace AppLock {
 
-static const char *kSaltHex = "984ddf62a30ca0ac6e5db84e3e72b843";
-static const char *kHashHex = "4a12bfd5c629a1d192f5b1be38d473adb5641e3ba320d8b6980eb5b2f91ee247e6131f0b7e8f1c47e21474dc278584c2d428093d56d667c450bce1c8c90fda0a";
+static const char *kSaltHex = "1e3d1a454dec6fdca45fd66683100647";
+static const char *kHashHex = "4fafc82ea51e5a8c301c7a8081323a0b477ead54cd50b011d723f448069738e1b808f7ee5260a23ed484ef6ce6a54bba6820297f9bd11482728f150abbdda97a";
 static const QString kService = QStringLiteral("com.brotherhood.canvas.qt");
 
 // ── scrypt (RFC 7914) on top of CommonCrypto's PBKDF2-HMAC-SHA256 ──────────
