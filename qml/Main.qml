@@ -11,9 +11,9 @@ ApplicationWindow {
         if (sizeForced) return []
         const g = app.windowGeometry()
         if (g.length !== 4 || g[2] < 720 || g[3] < 480) return []
+        // Qt 6.12 screen objects expose virtualX/virtualY/width/height, no longer a virtualGeometry rect
         for (const s of Qt.application.screens) {
-            const a = s.virtualGeometry
-            if (g[0] + 120 > a.x && g[0] + 120 < a.x + a.width && g[1] >= a.y - 4 && g[1] < a.y + a.height - 80) return g
+            if (g[0] + 120 > s.virtualX && g[0] + 120 < s.virtualX + s.width && g[1] >= s.virtualY - 4 && g[1] < s.virtualY + s.height - 80) return g
         }
         return []
     }
