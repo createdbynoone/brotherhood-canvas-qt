@@ -10,7 +10,7 @@ ApplicationWindow {
     readonly property var saved: {
         if (sizeForced) return []
         const g = app.windowGeometry()
-        if (g.length !== 4 || g[2] < 960 || g[3] < 600) return []
+        if (g.length !== 4 || g[2] < 720 || g[3] < 480) return []
         for (const s of Qt.application.screens) {
             const a = s.virtualGeometry
             if (g[0] + 120 > a.x && g[0] + 120 < a.x + a.width && g[1] >= a.y - 4 && g[1] < a.y + a.height - 80) return g
@@ -30,8 +30,8 @@ ApplicationWindow {
     onYChanged: rememberWindow.restart()
     onWidthChanged: rememberWindow.restart()
     onHeightChanged: rememberWindow.restart()
-    minimumWidth: 960
-    minimumHeight: 600
+    minimumWidth: 720
+    minimumHeight: 480
     color: Theme.bg
     title: canvas.state === "ready" ? board.boardName + " · Brotherhood Canvas" : "Brotherhood Canvas"
 

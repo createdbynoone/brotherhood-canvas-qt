@@ -11,12 +11,19 @@
 #include "canvas/canvascontroller.h"
 #include "canvas/mediaprovider.h"
 #include "core/lock.h"
+#include "core/prefs.h"
 #include "platform/mac.h"
 #ifdef BCQ_DEV
 #include "dev/driver.h"
 #endif
 
 int main(int argc, char *argv[]) {
+    // Interface scale (Settings > Interface): Qt only reads QT_SCALE_FACTOR at startup, so it is applied here, before
+    // the application exists. A value set in the environment (tests) wins.
+    const int scalePct = qBound(50, int(Prefs::ownNumber("uiScale", 100)), 100);
+    if (!qEnvironmentVariableIsSet("QT_SCALE_FACTOR") && scalePct != 100) qputenv("QT_SCALE_FACTOR", QByteArray::number(scalePct / 100.0));
+    qputenv("BCQ_SCALE_APPLIED", QByteArray::number(qEnvironmentVariableIsSet("QT_SCALE_FACTOR") ? int(qEnvironmentVariable("QT_SCALE_FACTOR").toDouble() * 100 + 0.5) : 100));
+    const double uiFactor = qEnvironmentVariable("BCQ_SCALE_APPLIED").toInt() / 100.0;
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName("Brotherhood Canvas");
     QGuiApplication::setOrganizationName("Brotherhood");
@@ -80,11 +87,13 @@ int main(int argc, char *argv[]) {
 
     auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().value(0));
     if (!window) return 1;
-    QTimer::singleShot(0, [window, &appCtl] {
+    QTimer::singleShot(0, [window, &appCtl, uiFactor] {
         Mac::styleWindow(window);
         // QML decides which points of the title bar are empty space (see Main.qml: titleBarHit)
-        Mac::installMagnify(window, [&appCtl](double x, double y, double m, int phase) { emit appCtl.magnified(x, y, m, phase); });
-        Mac::installTitleBarDrag(window, [window](double x, double y) {
+        // AppKit reports points; with a UI scale the QML coordinate space is points / scale
+        Mac::installMagnify(window, [&appCtl, uiFactor](double x, double y, double m, int phase) { emit appCtl.magnified(x / uiFactor, y / uiFactor, m, phase); });
+        Mac::installTitleBarDrag(window, [window, uiFactor](double x, double y) {
+            x /= uiFactor; y /= uiFactor;
             QVariant hit;
             QMetaObject::invokeMethod(window, "titleBarHit", Q_RETURN_ARG(QVariant, hit), Q_ARG(QVariant, x), Q_ARG(QVariant, y));
             return hit.toBool();

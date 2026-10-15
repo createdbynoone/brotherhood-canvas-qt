@@ -35,6 +35,8 @@ AppController::AppController(QObject *parent) : QObject(parent) {
     m_minimap = Prefs::ownBool("minimap", true);
     m_snap = Prefs::ownBool("snap", true);
     m_volume = qBound(0.0, Prefs::ownNumber("volume", 1.0), 1.0);
+    m_uiScale = qBound(50, int(Prefs::ownNumber("uiScale", 100)), 100);
+    m_activeUiScale = qEnvironmentVariableIsSet("BCQ_SCALE_APPLIED") ? qEnvironmentVariableIntValue("BCQ_SCALE_APPLIED") : m_uiScale;
     m_nam = new QNetworkAccessManager(this);
 }
 
@@ -45,6 +47,26 @@ void AppController::setSidebarOpen(bool on) { if (on != m_sidebar) { m_sidebar =
 void AppController::setMinimap(bool on) { if (on != m_minimap) { m_minimap = on; Prefs::setOwn("minimap", on); emit prefsChanged(); } }
 void AppController::setSnap(bool on) { if (on != m_snap) { m_snap = on; Prefs::setOwn("snap", on); emit prefsChanged(); } }
 void AppController::setVolume(double v) { v = qBound(0.0, v, 1.0); if (!qFuzzyCompare(v + 1, m_volume + 1)) { m_volume = v; Prefs::setOwn("volume", v); emit prefsChanged(); } }
+
+void AppController::setUiScale(int percent) {
+    percent = qBound(50, percent, 100);
+    if (percent == m_uiScale) return;
+    m_uiScale = percent;
+    Prefs::setOwn("uiScale", percent);
+    emit uiScaleChanged();
+}
+
+// Qt reads QT_SCALE_FACTOR once, at startup, so a new scale needs a fresh process: wait for this one to exit, reopen.
+void AppController::restart() {
+    QDir d(QCoreApplication::applicationDirPath());
+    d.cdUp(); d.cdUp();
+    const QString bundle = d.absolutePath();
+    if (bundle.endsWith(".app")) {
+        QProcess::startDetached("/bin/sh", {"-c", QStringLiteral("while kill -0 %1 2>/dev/null; do sleep 0.2; done; /usr/bin/open -n \"%2\"")
+                                                       .arg(QCoreApplication::applicationPid()).arg(bundle)});
+    }
+    QCoreApplication::quit();
+}
 
 void AppController::verifyKey(const QString &key) {
     if (key.isEmpty()) return;
@@ -166,11 +188,11 @@ void AppController::dismissUpdate() { m_updateVersion.clear(); m_updateUrl.clear
 
 QVariantList AppController::windowGeometry() const {
     const auto v = Prefs::own("window").toArray();
-    if (v.size() != 4) return {};
+    if (v.size() != 4 || int(Prefs::ownNumber("windowScale", 100)) != m_activeUiScale) return {};      // saved at another scale: points differ
     return {v[0].toInt(), v[1].toInt(), v[2].toInt(), v[3].toInt()};
 }
 
-void AppController::saveWindowGeometry(int x, int y, int w, int h) { Prefs::setOwn("window", QJsonArray{x, y, w, h}); }
+void AppController::saveWindowGeometry(int x, int y, int w, int h) { Prefs::setOwn("window", QJsonArray{x, y, w, h}); Prefs::setOwn("windowScale", m_activeUiScale); }
 
 // ── OS helpers ───────────────────────────────────────────────────────────
 void AppController::copyText(const QString &text) { QGuiApplication::clipboard()->setText(text); }

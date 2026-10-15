@@ -96,6 +96,25 @@ Popup {
                     Row_ { label: "A vault is a plain folder: boards as JSON, files in attachments. Back it up like any folder"; height: 38 }
                 }
                 Section {
+                    heading: "Interface"
+                    Row_ {
+                        label: "Scale"
+                        Segment {
+                            height_: 26; fontSize: 11; hPad: 9
+                            options: [100, 90, 80, 70, 60, 50].map(v => ({ key: v, label: v + "%" }))
+                            current: app.uiScale
+                            onPicked: key => app.uiScale = key
+                        }
+                    }
+                    Row_ {
+                        visible: app.uiScale !== app.activeUiScale
+                        height: visible ? 44 : 0
+                        label: "Restart to apply " + app.uiScale + "%"
+                        Btn { kind: "primary"; size: "xs"; text: "Restart now"; onClicked: app.restart() }
+                    }
+                    Row_ { label: "A smaller scale fits more on screen and lets the window shrink further"; height: 38 }
+                }
+                Section {
                     heading: "Canvas"
                     Row_ { label: "Snap to alignment guides"; Toggle { checked: app.snap; onToggled: v => { app.snap = v; board.snapEnabled = v } } }
                     Row_ { label: "Show minimap"; Toggle { checked: app.minimap; onToggled: v => app.minimap = v } }

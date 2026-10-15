@@ -23,6 +23,8 @@ class AppController : public QObject {
     Q_PROPERTY(bool minimap READ minimap WRITE setMinimap NOTIFY prefsChanged)
     Q_PROPERTY(bool snap READ snap WRITE setSnap NOTIFY prefsChanged)
     Q_PROPERTY(double volume READ volume WRITE setVolume NOTIFY prefsChanged)
+    Q_PROPERTY(int uiScale READ uiScale WRITE setUiScale NOTIFY uiScaleChanged)        // chosen, percent; applies on relaunch
+    Q_PROPERTY(int activeUiScale READ activeUiScale CONSTANT)                         // the scale this run started with
 
 public:
     explicit AppController(QObject *parent = nullptr);
@@ -44,6 +46,9 @@ public:
     void setMinimap(bool on);
     bool snap() const { return m_snap; }
     void setSnap(bool on);
+    int uiScale() const { return m_uiScale; }
+    void setUiScale(int percent);
+    int activeUiScale() const { return m_activeUiScale; }
     double volume() const { return m_volume; }
     void setVolume(double v);
 
@@ -51,6 +56,7 @@ public:
     Q_INVOKABLE void forgetKey();
     Q_INVOKABLE void dismissUpdate();
     Q_INVOKABLE void checkForUpdate();
+    Q_INVOKABLE void restart();             // quit and open the app again (applies the interface scale)
     Q_INVOKABLE void installUpdate();       // download the release zip, replace this app, relaunch
     Q_INVOKABLE void copyText(const QString &text);
     Q_INVOKABLE void openUrl(const QUrl &url);
@@ -70,6 +76,7 @@ signals:
     void updateChanged();
     void updatingChanged();
     void prefsChanged();
+    void uiScaleChanged();
     void keyResult(bool ok, double lockUntil);
     void toast(const QString &message, int kind);
     void magnified(double x, double y, double magnification, int phase);   // trackpad pinch, window coordinates
@@ -78,6 +85,7 @@ private:
     bool m_unlocked = false, m_reduceMotion = false, m_checking = false, m_updating = false;
     bool m_sidebar = true, m_minimap = true, m_snap = true;
     double m_volume = 1, m_progress = 0;
+    int m_uiScale = 100, m_activeUiScale = 100;
     QString m_updateVersion, m_updateError;
     QUrl m_updateUrl, m_updateAsset;
     QNetworkAccessManager *m_nam = nullptr;

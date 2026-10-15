@@ -5,6 +5,8 @@ import QtQuick.Dialogs
 Rectangle {
     id: root
     property Item view
+    property real room: 100000          // width the dock may use; a narrow window drops the secondary tools
+    readonly property bool slim: room < 620
     signal exportClicked()
 
     FileDialog {
@@ -66,10 +68,10 @@ Rectangle {
         Tool { icon: "text-t"; tip: "Add text"; hint: "X"; onClicked: { const c = root.view.centerWorld(); canvas.addText(c.x, c.y, "text") } }
         Tool { icon: "image"; tip: "Add images, video or PDF"; onClicked: media.open() }
         Sep {}
-        Tool { icon: "arrow-u-up-left"; tip: "Undo"; hint: "⌘Z"; enabled_: board.canUndo; onClicked: board.undo() }
-        Tool { icon: "arrow-u-up-right"; tip: "Redo"; hint: "⇧⌘Z"; enabled_: board.canRedo; onClicked: board.redo() }
-        Sep {}
-        Tool { icon: "magnifying-glass-minus"; tip: "Zoom out"; hint: "-"; onClicked: root.view.zoomStep(0.8) }
+        Tool { visible: !root.slim; icon: "arrow-u-up-left"; tip: "Undo"; hint: "⌘Z"; enabled_: board.canUndo; onClicked: board.undo() }
+        Tool { visible: !root.slim; icon: "arrow-u-up-right"; tip: "Redo"; hint: "⇧⌘Z"; enabled_: board.canRedo; onClicked: board.redo() }
+        Sep { visible: !root.slim }
+        Tool { visible: !root.slim; icon: "magnifying-glass-minus"; tip: "Zoom out"; hint: "-"; onClicked: root.view.zoomStep(0.8) }
         Rectangle {
             width: 52; height: 34; radius: Theme.rControl
             anchors.verticalCenter: parent.verticalCenter
@@ -79,11 +81,11 @@ Rectangle {
             TapHandler { onTapped: zoomMenu.popup(parent, 0, -zoomMenu.implicitHeight - 8) }
             Tip { target: parent; text: "Zoom"; }
         }
-        Tool { icon: "magnifying-glass-plus"; tip: "Zoom in"; hint: "+"; onClicked: root.view.zoomStep(1.25) }
+        Tool { visible: !root.slim; icon: "magnifying-glass-plus"; tip: "Zoom in"; hint: "+"; onClicked: root.view.zoomStep(1.25) }
         Tool { icon: "frame-corners"; tip: "Fit all"; hint: "F"; enabled_: board.count > 0; onClicked: root.view.fitAll() }
         Sep {}
-        Tool { icon: "dots-nine"; tip: "Background"; onClicked: bgMenu.popup(parent, 0, -bgMenu.implicitHeight - 8) }
-        Tool { icon: "map-trifold"; tip: "Minimap"; on: app.minimap; onClicked: app.minimap = !app.minimap }
+        Tool { visible: !root.slim; icon: "dots-nine"; tip: "Background"; onClicked: bgMenu.popup(parent, 0, -bgMenu.implicitHeight - 8) }
+        Tool { visible: !root.slim; icon: "map-trifold"; tip: "Minimap"; on: app.minimap; onClicked: app.minimap = !app.minimap }
         Tool { icon: "export"; tip: "Export board"; enabled_: board.count > 0 && !canvas.exporting; onClicked: root.exportClicked() }
     }
     MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons; onWheel: w => w.accepted = true }

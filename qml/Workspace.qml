@@ -169,7 +169,8 @@ Item {
     Toolbar {
         id: toolbar
         view: cv
-        x: Cam.insetLeft + (parent.width - Cam.insetLeft - width) / 2
+        room: parent.width - Cam.insetLeft - 24
+        x: Cam.insetLeft + 12 + Math.max(0, (room - width) / 2)
         anchors.bottom: parent.bottom; anchors.bottomMargin: 16
         onExportClicked: exportDialog.open()
     }
