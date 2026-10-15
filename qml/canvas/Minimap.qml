@@ -50,6 +50,7 @@ Rectangle {
     }
     MouseArea {
         anchors.fill: parent
+        hoverEnabled: true
         function go(m) {
             const wx = root.minX + (m.x - root.ox) / root.k, wy = root.minY + (m.y - root.oy) / root.k
             const c = Qt.point(Cam.insetLeft + (Cam.viewW - Cam.insetLeft) / 2, Cam.viewH / 2)

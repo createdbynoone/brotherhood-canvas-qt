@@ -51,7 +51,7 @@ Item {
         border.color: Qt.rgba(1, 1, 1, 0.06)
     }
 
-    MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons; onWheel: w => w.accepted = true }   // the sidebar floats over the canvas: swallow input
+    MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons; hoverEnabled: true; onWheel: w => w.accepted = true }   // the sidebar floats over the canvas: swallow input
 
     property string filter: ""
     property string renamingId: ""

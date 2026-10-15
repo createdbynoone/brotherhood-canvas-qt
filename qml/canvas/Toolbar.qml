@@ -88,5 +88,5 @@ Rectangle {
         Tool { visible: !root.slim; icon: "map-trifold"; tip: "Minimap"; on: app.minimap; onClicked: app.minimap = !app.minimap }
         Tool { icon: "export"; tip: "Export board"; enabled_: board.count > 0 && !canvas.exporting; onClicked: root.exportClicked() }
     }
-    MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons; onWheel: w => w.accepted = true }
+    MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons; hoverEnabled: true; onWheel: w => w.accepted = true }
 }

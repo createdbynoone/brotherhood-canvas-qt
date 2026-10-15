@@ -100,5 +100,5 @@ Rectangle {
         Sep {}
         Btn { kind: "ghost"; size: "s"; icon: "trash"; tip: "Delete"; hint: "Del"; onClicked: board.deleteSelected(); anchors.verticalCenter: parent.verticalCenter }
     }
-    MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons; onWheel: w => w.accepted = true }
+    MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons; hoverEnabled: true; onWheel: w => w.accepted = true }
 }

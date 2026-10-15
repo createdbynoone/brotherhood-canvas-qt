@@ -411,6 +411,7 @@ FocusScope {
         }
     }
 
+    property var floating: []                // panels drawn over the board (set by Workspace)
     property bool blocked: false             // set while the lightbox is open
     property real lastScrollMs: 0
     property real lastPinchMs: 0
@@ -422,6 +423,11 @@ FocusScope {
         target: app
         function onMagnified(x, y, mag, phase) {
             if (view.blocked) return          // a viewer (lightbox) is open: the pinch belongs to it
+            for (const it of view.floating.concat([ctxBar, edgeBar])) {      // pinching over a floating panel is not for the board
+                if (!it || !it.visible) continue
+                const q = it.mapFromItem(null, x, y)
+                if (q.x >= 0 && q.y >= 0 && q.x <= it.width && q.y <= it.height) return
+            }
             if (phase & 1) { view.pinchSum = 0; view.pinchOn = false }
             if ((phase & 24) && !(phase & 6)) { view.pinchOn = false; view.pinchSum = 0; return }
             if (input.pressed || (!view.pinchOn && Date.now() - view.lastScrollMs < 200)) return

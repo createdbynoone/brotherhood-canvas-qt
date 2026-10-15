@@ -1,0 +1,8 @@
+key f
+wait 700
+eval "zoom0=" + Cam.zoom.toFixed(3)
+eval (app.magnified(120, 300, 0.05, 1), app.magnified(120, 300, 0.1, 4), app.magnified(120, 300, 0.1, 4), app.magnified(120, 300, 0, 8), "pinch over sidebar") + ""
+eval "zoom after pinch over SIDEBAR (must stay)=" + Cam.zoom.toFixed(3)
+eval (app.magnified(900, 400, 0.05, 1), app.magnified(900, 400, 0.1, 4), app.magnified(900, 400, 0.1, 4), app.magnified(900, 400, 0, 8), "pinch over canvas") + ""
+eval "zoom after pinch over CANVAS (must change)=" + Cam.zoom.toFixed(3)
+quit

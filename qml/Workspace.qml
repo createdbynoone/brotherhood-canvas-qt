@@ -90,6 +90,7 @@ Item {
         anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
         anchors.top: titleBar.bottom
         blocked: lightbox.open
+        floating: [sidebar, toolbar, stylePanel, minimap]
         onStyleRequested: ws.styleOpen = !ws.styleOpen
         onPreviewRequested: id => lightbox.show(id)
         onContextRequested: info => ws.showMenu(info)
@@ -175,6 +176,7 @@ Item {
         onExportClicked: exportDialog.open()
     }
     Minimap {
+        id: minimap
         visible: app.minimap && board.count > 0 && ws.width >= 1180
         anchors.right: parent.right; anchors.rightMargin: 16
         anchors.bottom: parent.bottom; anchors.bottomMargin: 16
