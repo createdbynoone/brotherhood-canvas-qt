@@ -1,0 +1,43 @@
+# Arrow keys and Delete while editing never move or delete the card, even at the first / last line.
+eval (board.addNode("note", 700, 330, 260, 170), "n") + ""
+eval (board.setNodeData(board.selectedId, "content", "una\ndos"), "set") + ""
+eval (app.sidebarOpen = false) + ""
+key f
+wait 700
+eval (window = board.selectedId, "id") + ""
+eval "before: x=" + board.rectOf(board.selectedId).x.toFixed(1) + " y=" + board.rectOf(board.selectedId).y.toFixed(1) + " count=" + board.count
+eval (board.editingId = board.selectedId, "editing") + ""
+wait 300
+key up
+key up
+key up
+key left
+key left
+key left
+key left
+key left
+key left
+key down
+key down
+key down
+key down
+key right
+key right
+key right
+key right
+key right
+key right
+key right
+wait 300
+eval "after arrows: x=" + board.rectOf(board.selectedId).x.toFixed(1) + " y=" + board.rectOf(board.selectedId).y.toFixed(1) + " count=" + board.count + " editing=" + (board.editingId !== "")
+key a cmd
+key delete
+key delete
+wait 300
+eval "after delete on empty: count=" + board.count + " editing=" + (board.editingId !== "")
+eval (Cam.editCancel(), "cancel") + ""
+wait 200
+key up
+key left
+eval "after leaving edit, arrow moves the card again: x=" + board.rectOf(board.selectedId).x.toFixed(1) + " y=" + board.rectOf(board.selectedId).y.toFixed(1)
+quit

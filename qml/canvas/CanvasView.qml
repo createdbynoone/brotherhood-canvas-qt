@@ -450,6 +450,9 @@ FocusScope {
     // ── Keyboard ─────────────────────────────────────────────────────────
     Keys.onReleased: e => { if (e.key === Qt.Key_Space && !e.isAutoRepeat) { spaceDown = false; e.accepted = true } }
     Keys.onPressed: e => {
+        // While a text is being edited its keys are its own: an arrow at the first or last line, or Delete on an empty
+        // text, is not handled by the editor and would otherwise bubble up here and nudge or delete the card
+        if (board.editingId !== "" || labelEditor.shown || edgeLabelEditor.shown) return
         const cmd = (e.modifiers & Qt.ControlModifier) !== 0, shift = (e.modifiers & Qt.ShiftModifier) !== 0
         const k = e.key
         e.accepted = true
