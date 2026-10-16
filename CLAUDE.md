@@ -1,5 +1,7 @@
 # Brotherhood Canvas (Qt 6 / C++)
 
+> Mapa general del proyecto (estado, decisiones, pruebas, publicar): `BLUEPRINT.md`. Este archivo guarda el detalle y las trampas.
+
 Mind maps y moodboards sobre un vault local (carpeta tipo Obsidian). Lógica en C++20, interfaz en QML (Qt Quick, controles propios), capa nativa de Apple en Objective-C++. Reemplaza a la app Electron (`../Brotherhood Canvas`, v1.4.1), que sigue intacta y **lee/escribe los mismos datos**.
 
 **Build:** `brew install qt cmake ninja` · `cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=$(brew --prefix qt) -DBCQ_DEV=ON && cmake --build build` → `build/Brotherhood Canvas.app`. `BCQ_DEV=ON` solo para desarrollo (activa el modo de pruebas y `BCQ_SKIP_LOCK`); los releases NUNCA lo llevan.
@@ -68,7 +70,7 @@ tools/         release.sh, prune_bundle.sh, dev-test.sh, make_fixture.py, drive/
 - Pruebas: `tools/drive/arrows.drv` (flechas, scroll/pellizco simulado con `app.magnified`) y `merge.drv` (punta compartida); `eval` no admite variables globales nuevas (usar expresiones sin asignar).
 - Barra superior: sin engranaje (queda el de la barra lateral, ⌘, y la paleta); Search más ancho; la barra lateral no muestra la ruta del vault.
 
-## Ajustes post 2.1.1 (sin publicar)
+## Ajustes 2.2.x (publicados en 2.2.0 a 2.2.3)
 - **Paleta**: naranja se queda; azul→morado `#8B5CF6`, verde→lima `#B7E43C`, rojo→borgoña `#9B2243` (Theme `noteColors/edgeColors/presets`, `ColorField.swatches`). Los colores ya guardados en boards no se tocan.
 - **Sidebar de cristal**: `Sidebar.qml` copia `InspectorOverlay` de Studio (`ShaderEffectSource` del `CanvasView` + `MultiEffect` con máscara + tinte 0.72). `blurSource: cv` en `Workspace`.
 - **Lightbox**: el pellizco llega por `app.magnified` (monitor global), no por el MouseArea; `CanvasView.blocked` (= `lightbox.open`) lo ignora y `Lightbox` lo aplica a la imagen.
