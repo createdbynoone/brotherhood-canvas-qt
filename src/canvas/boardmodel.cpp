@@ -26,7 +26,7 @@ QHash<int, QByteArray> BoardModel::roleNames() const {
             {FilePathRole, "filePath"}, {FileAbsRole, "fileAbs"}, {FileNameRole, "fileName"}, {FileSizeRole, "fileSize"},
             {ThumbPathRole, "thumbPath"}, {NoteColorRole, "noteColor"}, {FontSizeRole, "fontSize"}, {StyleBgRole, "sBg"},
             {StyleBorderRole, "sBorder"}, {StyleBorderWRole, "sBorderW"}, {StyleRadiusRole, "sRadius"},
-            {StyleOpacityRole, "sOpacity"}, {HasStyleRole, "hasStyle"}, {EditingRole, "editing"}};
+            {StyleOpacityRole, "sOpacity"}, {HasStyleRole, "hasStyle"}, {EditingRole, "editing"}, {TextColorRole, "textColor"}};
 }
 
 QVariant BoardModel::data(const QModelIndex &index, int role) const {
@@ -56,6 +56,7 @@ QVariant BoardModel::data(const QModelIndex &index, int role) const {
     case ThumbPathRole: return n.data.value("thumbnailPath").toString();
     case NoteColorRole: return n.data.value("noteColor").toString(kAccentHex);
     case FontSizeRole: return n.data.value("fontSize").toInt(32);
+    case TextColorRole: return n.data.value("textColor").toString();
     case StyleBgRole: return st.value("backgroundColor").toString();
     case StyleBorderRole: return st.value("borderColor").toString();
     case StyleBorderWRole: return st.value("borderWidth").toDouble(-1);
@@ -167,7 +168,7 @@ QVariantMap BoardModel::nodeInfo(const QString &id) const {
             {"label", n.data.value("label").toString()}, {"content", n.data.value("content").toString()},
             {"locked", n.data.value("locked").toBool()}, {"fileName", n.data.value("fileName").toString()},
             {"filePath", n.data.value("filePath").toString()}, {"noteColor", n.data.value("noteColor").toString(kAccentHex)},
-            {"fontSize", n.data.value("fontSize").toInt(32)}, {"hasStyle", !n.data.value("nodeStyle").toObject().isEmpty()},
+            {"fontSize", n.data.value("fontSize").toInt(32)}, {"textColor", n.data.value("textColor").toString()}, {"hasStyle", !n.data.value("nodeStyle").toObject().isEmpty()},
             {"sBg", n.data.value("nodeStyle").toObject().value("backgroundColor").toString()},
             {"sBorder", n.data.value("nodeStyle").toObject().value("borderColor").toString()},
             {"sBorderW", n.data.value("nodeStyle").toObject().value("borderWidth").toDouble(-1)},

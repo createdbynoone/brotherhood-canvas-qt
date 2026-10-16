@@ -19,6 +19,7 @@ Item {
         if (startOpen === "settings") settings.open()
         else if (startOpen === "palette") openPalette()
         else if (startOpen === "export") exportDialog.open()
+        else if (startOpen === "style") Qt.callLater(() => { const ids = board.ids(); if (ids.length) { board.selectOnly(ids[0]); ws.styleOpen = true } })
     }
 
     Connections { target: app; function onToast(m, k) { toasts.show(m, k) } }

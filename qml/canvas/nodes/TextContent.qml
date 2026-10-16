@@ -107,17 +107,37 @@ Item {
         anchors.fill: parent
         active: node.editing && !Cam.exporting
         sourceComponent: Item {
+          // The text can be taller than the card: the editor scrolls, and always keeps the cursor in view
+          Flickable {
+            id: flick
+            x: root.padX; y: root.padTop
+            width: parent.width - root.padX * 2
+            height: parent.height - root.padTop - 10
+            contentWidth: width
+            contentHeight: Math.max(ed.contentHeight + 4, height)
+            clip: true
+            interactive: false
+            function follow() {
+                const r = ed.cursorRectangle, pad = 6
+                if (r.y - pad < contentY) contentY = Math.max(0, r.y - pad)
+                else if (r.y + r.height + pad > contentY + height) contentY = Math.max(0, Math.min(contentHeight - height, r.y + r.height + pad - height))
+            }
+            WheelHandler {
+                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                onWheel: e => flick.contentY = Math.max(0, Math.min(flick.contentHeight - flick.height, flick.contentY - (e.pixelDelta.y !== 0 ? e.pixelDelta.y : e.angleDelta.y / 2)))
+            }
             TextEdit {
                 id: ed
-                x: root.padX; y: root.padTop
-                width: parent.width - root.padX * 2
-                height: parent.height - root.padTop - 10
+                width: flick.width
+                height: flick.contentHeight
+                onCursorRectangleChanged: flick.follow()
                 wrapMode: TextEdit.Wrap
                 color: root.ink
                 font.family: Theme.sans
                 font.pixelSize: 13
-                selectionColor: Theme.alpha(Theme.accent, 0.45)
-                selectedTextColor: root.ink
+                // inverted: the selection takes the text colour and the text takes the card's colour, so it reads on any note colour
+                selectionColor: root.ink
+                selectedTextColor: root.isNote ? node.noteFill : Theme.bg
                 selectByMouse: true
                 renderType: Text.QtRendering
                 persistentSelection: true
@@ -149,6 +169,7 @@ Item {
                 onActiveFocusChanged: if (!activeFocus && node.editing) finish()
                 Connections { target: Cam; function onEditAccept() { ed.finish() } function onEditCancel() { ed.cancel() } }
             }
+          }
         }
     }
 }

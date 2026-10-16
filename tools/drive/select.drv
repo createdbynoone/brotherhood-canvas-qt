@@ -1,0 +1,13 @@
+# Selected text is inverted so it reads on an orange note.
+eval (board.addNode("note", 700, 330, 260, 170), "n") + ""
+eval (board.setNodeData(board.selectedId, "content", "Texto sobre nota naranja"), "set") + ""
+eval (app.sidebarOpen = false) + ""
+key f
+wait 700
+eval (board.editingId = board.selectedId, "editing") + ""
+wait 300
+key a cmd
+wait 400
+shot $WORK/select.png
+eval (Cam.editCancel(), "cancel") + ""
+quit

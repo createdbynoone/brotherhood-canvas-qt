@@ -24,6 +24,7 @@ Item {
     required property string thumbPath
     required property string noteColor
     required property int fontSize
+    required property string textColor
     required property string sBg
     required property string sBorder
     required property real sBorderW

@@ -1,0 +1,8 @@
+# Title text colour: purple through the model, then read back.
+eval (board.setNodeData("ttl01-0000", "textColor", "#8B5CF6"), "colour=" + board.nodeInfo("ttl01-0000").textColor) + ""
+eval (app.sidebarOpen = false) + ""
+key f
+wait 800
+shot $WORK/titlecolor.png
+eval (board.setNodeData("ttl01-0000", "textColor", null), "reset=" + JSON.stringify(board.nodeInfo("ttl01-0000").textColor)) + ""
+quit

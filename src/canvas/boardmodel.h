@@ -45,7 +45,7 @@ public:
     enum Roles {
         IdRole = Qt::UserRole + 1, TypeRole, XRole, YRole, WRole, HRole, SelectedRole, ContentRole, LabelRole, LockedRole,
         FilePathRole, FileAbsRole, FileNameRole, FileSizeRole, ThumbPathRole, NoteColorRole, FontSizeRole,
-        StyleBgRole, StyleBorderRole, StyleBorderWRole, StyleRadiusRole, StyleOpacityRole, HasStyleRole, EditingRole
+        StyleBgRole, StyleBorderRole, StyleBorderWRole, StyleRadiusRole, StyleOpacityRole, HasStyleRole, EditingRole, TextColorRole
     };
 
     explicit BoardModel(QObject *parent = nullptr);

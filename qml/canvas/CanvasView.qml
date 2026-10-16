@@ -400,6 +400,11 @@ FocusScope {
         // Scroll pans, Cmd/Ctrl+scroll and pinch zoom. A two-finger scroll on a trackpad also emits tiny
         // magnify events, so scrolling stamps `lastScrollMs` and the pinch handler ignores that window.
         onWheel: w => {
+            // over the card being edited a plain scroll belongs to its text (it scrolls inside the card), not to the board
+            if (board.editingId !== "" && !(w.modifiers & (Qt.ControlModifier | Qt.MetaModifier))) {
+                const er = board.rectOf(board.editingId), ex = Cam.wx(w.x), ey = Cam.wy(w.y)
+                if (ex >= er.x && ex <= er.x + er.width && ey >= er.y && ey <= er.y + er.height) { w.accepted = false; return }
+            }
             view.lastScrollMs = Date.now()
             if (Date.now() - view.lastPinchMs < 160) { w.accepted = true; return }   // pinch tail: no stray pan
             if ((w.modifiers & Qt.ControlModifier) || (w.modifiers & Qt.MetaModifier)) {

@@ -13,7 +13,7 @@ Item {
         anchors.margins: 6
         text: node.content.length > 0 ? node.content : "Title"
         opacity: node.content.length > 0 ? 1 : 0.3
-        color: Theme.text
+        color: node.textColor.length > 0 ? node.textColor : Theme.text
         font.family: Theme.headingFamily
         font.weight: Theme.headingWeight
         font.pixelSize: root.px
@@ -29,20 +29,39 @@ Item {
         anchors.fill: parent
         active: node.editing && !Cam.exporting
         sourceComponent: Item {
+          // A title taller than its box scrolls and keeps the cursor in view
+          Flickable {
+            id: flick
+            anchors.fill: parent
+            anchors.margins: 6
+            contentWidth: width
+            contentHeight: Math.max(ed.contentHeight + 4, height)
+            clip: true
+            interactive: false
+            function follow() {
+                const r = ed.cursorRectangle, pad = 4
+                if (r.y - pad < contentY) contentY = Math.max(0, r.y - pad)
+                else if (r.y + r.height + pad > contentY + height) contentY = Math.max(0, Math.min(contentHeight - height, r.y + r.height + pad - height))
+            }
+            WheelHandler {
+                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                onWheel: e => flick.contentY = Math.max(0, Math.min(flick.contentHeight - flick.height, flick.contentY - (e.pixelDelta.y !== 0 ? e.pixelDelta.y : e.angleDelta.y / 2)))
+            }
             TextEdit {
                 id: ed
-                anchors.fill: parent
-                anchors.margins: 6
+                width: flick.width
+                height: flick.contentHeight
+                onCursorRectangleChanged: flick.follow()
                 wrapMode: TextEdit.Wrap
-                color: Theme.text
+                color: node.textColor.length > 0 ? node.textColor : Theme.text
                 font.family: Theme.headingFamily
                 font.weight: Theme.headingWeight
                 font.pixelSize: root.px
                 font.capitalization: Font.AllUppercase
                 horizontalAlignment: TextEdit.AlignHCenter
                 verticalAlignment: TextEdit.AlignVCenter
-                selectionColor: Theme.alpha(Theme.accent, 0.45)
-                selectedTextColor: Theme.text
+                selectionColor: node.textColor.length > 0 ? node.textColor : Theme.text    // inverted against the text
+                selectedTextColor: Theme.bg
                 selectByMouse: true
                 renderType: Text.QtRendering
                 Component.onCompleted: { original = node.content; text = node.content; board.beginGesture(); forceActiveFocus(); selectAll() }
@@ -68,6 +87,7 @@ Item {
                 onActiveFocusChanged: if (!activeFocus && node.editing) finish()
                 Connections { target: Cam; function onEditAccept() { ed.finish() } function onEditCancel() { ed.cancel() } }
             }
+          }
         }
     }
 }

@@ -1,0 +1,31 @@
+# A long text in a small note: while typing, the editor scrolls so the cursor stays visible.
+eval (board.addNode("note", 700, 330, 260, 170), "n") + ""
+eval (app.sidebarOpen = false) + ""
+key f
+wait 700
+eval (board.editingId = board.selectedId, "editing") + ""
+wait 300
+type uno
+key return
+type dos
+key return
+type tres
+key return
+type cuatro
+key return
+type cinco
+key return
+type seis
+key return
+type siete
+key return
+type ocho
+key return
+type nueve
+key return
+type diez
+wait 700
+shot $WORK/longedit.png
+eval (Cam.editAccept(), "accepted") + ""
+wait 300
+quit

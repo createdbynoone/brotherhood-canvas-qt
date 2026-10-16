@@ -6,7 +6,7 @@ Rectangle {
     id: root
     signal closed()
     width: 288
-    height: Math.min(body.implicitHeight + 46, parent.height - y - 90)
+    height: Math.min(body.implicitHeight + 72, parent.height - y - 90)
     radius: Theme.rPanel
     color: Theme.alpha(Theme.surface, 0.97)
     border.color: Theme.hairlineStrong
@@ -26,7 +26,11 @@ Rectangle {
         Row {
             anchors.right: parent.right; anchors.rightMargin: 8; anchors.verticalCenter: parent.verticalCenter
             spacing: 2
-            Btn { visible: root.info.hasStyle === true; kind: "ghost"; size: "xs"; text: "Reset"; onClicked: board.resetStyle(root.id) }
+            Btn {
+                visible: root.info.type === "title" ? !!root.info.textColor : root.info.hasStyle === true
+                kind: "ghost"; size: "xs"; text: "Reset"
+                onClicked: root.info.type === "title" ? board.setNodeData(root.id, "textColor", null) : board.resetStyle(root.id)
+            }
             Btn { kind: "ghost"; size: "xs"; icon: "x"; onClicked: root.closed() }
         }
         Hairline { anchors.bottom: parent.bottom }
@@ -55,6 +59,38 @@ Rectangle {
             component Label_: Txt { variant: "label"; muted: true }
 
             Column {
+                visible: root.info.type === "title"
+                width: parent.width; spacing: 10
+                Label_ { text: "Text colour" }
+                Flow {
+                    width: parent.width; spacing: 8
+                    Repeater {
+                        // Default follows the board: light on the dark canvas
+                        model: [{ hex: "", c: Theme.text, tip: "Default" }, { hex: "#F54F1B", c: "#F54F1B", tip: "Orange" }, { hex: "#8B5CF6", c: "#8B5CF6", tip: "Purple" },
+                                { hex: "#B7E43C", c: "#B7E43C", tip: "Lime" }, { hex: "#9B2243", c: "#9B2243", tip: "Burgundy" }]
+                        delegate: Rectangle {
+                            required property var modelData
+                            readonly property bool on: (root.info.textColor || "").toUpperCase() === modelData.hex.toUpperCase()
+                            width: 28; height: 28; radius: 14
+                            color: modelData.c
+                            border.width: on ? 2 : 1; border.color: on ? Theme.accent : Theme.hairlineStrong
+                            Rectangle { visible: parent.on; anchors.centerIn: parent; width: 8; height: 8; radius: 4; color: modelData.hex === "" ? Theme.bg : Theme.text }
+                            HoverHandler { cursorShape: Qt.PointingHandCursor }
+                            TapHandler { onTapped: board.setNodeData(root.id, "textColor", modelData.hex.length ? modelData.hex : null) }
+                            Tip { target: parent; text: modelData.tip }
+                        }
+                    }
+                }
+                ColorField {
+                    width: parent.width
+                    value: root.info.textColor ? root.info.textColor : ""
+                    fallback: "#ECE8DF"
+                    swatches: ["#ECE8DF", "#FFFFFF", "#0B0B0A", "#F54F1B", "#8B5CF6", "#B7E43C", "#9B2243", "#E8B547"]
+                    onPicked: hex => board.setNodeData(root.id, "textColor", hex.length ? hex : null)
+                }
+            }
+            Column {
+                visible: root.info.type !== "title"
                 width: parent.width; spacing: 8
                 Label_ { text: "Presets" }
                 Grid {
@@ -99,11 +135,13 @@ Rectangle {
                 }
             }
             Column {
+                visible: root.info.type !== "title"
                 width: parent.width; spacing: 8
                 Label_ { text: "Fill" }
                 ColorField { width: parent.width; value: root.info.sBg ? root.info.sBg : ""; fallback: root.info.type === "image" ? "transparent" : "#111110"; onPicked: hex => hex.length ? board.setStyle(root.id, "backgroundColor", hex) : board.setStyle(root.id, "backgroundColor", null) }
             }
             Column {
+                visible: root.info.type !== "title"
                 width: parent.width; spacing: 8
                 Label_ { text: "Border" }
                 ColorField { width: parent.width; value: root.info.sBorder ? root.info.sBorder : ""; fallback: "#2A2A28"; onPicked: hex => hex.length ? board.setStyle(root.id, "borderColor", hex) : board.setStyle(root.id, "borderColor", null) }
@@ -116,6 +154,7 @@ Rectangle {
                 }
             }
             Column {
+                visible: root.info.type !== "title"
                 width: parent.width; spacing: 4
                 Label_ { text: "Corner radius" }
                 Slide {
@@ -127,6 +166,7 @@ Rectangle {
                 }
             }
             Column {
+                visible: root.info.type !== "title"
                 width: parent.width; spacing: 4
                 Label_ { text: "Opacity" }
                 Slide {
