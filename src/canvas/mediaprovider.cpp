@@ -17,6 +17,7 @@
 namespace {
 
 QMutex gMutex;
+std::atomic<int> gPending{0};
 QString gRoot;
 QCache<QString, QImage> gCache(128 * 1024 * 1024);      // cost = bytes
 
@@ -39,6 +40,7 @@ public:
     void run() override {
         if (!m_cancelled) m_image = load();
         emit finished();
+        --gPending;
     }
 
 private:
@@ -70,6 +72,8 @@ private:
 
 MediaProvider::MediaProvider() { m_pool.setMaxThreadCount(qMax(2, QThread::idealThreadCount() - 2)); }
 
+int MediaProvider::pending() { return gPending.load(); }
+
 void MediaProvider::dropCache() { QMutexLocker l(&gMutex); gCache.clear(); }
 
 void MediaProvider::setRoot(const QString &vaultPath) {
@@ -88,6 +92,7 @@ QQuickImageResponse *MediaProvider::requestImageResponse(const QString &id, cons
     }
     const QString rel = QUrl::fromPercentEncoding(enc.toUtf8());
     auto *r = new Response(rel + "?" + QString::number(side), rel, side);
+    ++gPending;
     m_pool.start(r);
     return r;
 }

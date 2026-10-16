@@ -73,6 +73,7 @@ int main(int argc, char *argv[]) {
 
     AppController appCtl;
     CanvasController canvas;
+    canvas.setAppController(&appCtl);
     QObject::connect(&app, &QGuiApplication::aboutToQuit, &canvas, &CanvasController::flush);
 
     QQmlApplicationEngine engine;
@@ -84,6 +85,7 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("sizeForced", cli.isSet(size) || cli.isSet(grab));
     engine.rootContext()->setContextProperty("brandFamily", brandFamily);
     engine.rootContext()->setContextProperty("markerFamily", markerFamily);
+    app.setProperty("markerFamily", markerFamily);
     engine.rootContext()->setContextProperty("startOpen", cli.value(openOpt));
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);

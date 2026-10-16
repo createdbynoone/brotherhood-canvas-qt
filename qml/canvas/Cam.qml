@@ -12,6 +12,7 @@ QtObject {
     property real originX: 0              // where the canvas sits in the window (test driver, popups)
     property real originY: 0
     property real insetLeft: 0            // width covered by the floating sidebar
+    property bool exporting: false        // true only inside the export scene (its own engine): no selection, hover or editing chrome
     property string tool: "select"        // select | pan
     property string hoverId: ""           // node under the pointer
     property string hoverKind: ""         // node | handle | resize | edge | none

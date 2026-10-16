@@ -1,0 +1,12 @@
+# Blank lines survive, single Enter stays a line break, lists sit near the left edge.
+eval (board.addNode("note", 700, 330, 300, 320), "n") + ""
+eval (board.setNodeData(board.selectedId, "content", "# Compras\n\nlinea uno\nlinea dos\n\n\n\ndespues de tres vacias\n\n1. primero\n2. segundo con un texto largo que debe envolverse bajo el texto y no bajo el numero\n3. tercero\n\n- viñeta a\n- viñeta b\n  - sub viñeta"), board.setNodeData(board.selectedId, "noteColor", "#E8B547"), "set") + ""
+eval (board.addNode("text", 1060, 330, 300, 320), "t") + ""
+eval (board.setNodeData(board.selectedId, "content", "## Tarjeta\n\nuna linea\notra linea\n\n\ncon **negrita** y listas:\n1. uno\n2. dos\n3. tres"), "set") + ""
+eval (app.sidebarOpen = false) + ""
+key f
+wait 900
+shot $WORK/lists.png
+eval (board.clearSelection(), canvas.exportBoard("file://$WORK/lists_export.png", false), "x") + ""
+wait 5000
+quit

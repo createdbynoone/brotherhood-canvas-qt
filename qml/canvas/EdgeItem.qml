@@ -33,9 +33,9 @@ Item {
     required property string dstSide
 
     readonly property bool hovered: Cam.hoverEdgeId === edgeId
-    readonly property bool active: selected || hovered
+    readonly property bool active: !Cam.exporting && (selected || hovered)
     function solid(c, a) { const bg = Theme.bg; return Qt.rgba(bg.r + (c.r - bg.r) * a, bg.g + (c.g - bg.g) * a, bg.b + (c.b - bg.b) * a, 1) }
-    readonly property color tone: selected ? Theme.accent
+    readonly property color tone: selected && !Cam.exporting ? Theme.accent
         : color.length > 0 ? color
         : hovered ? solid(Theme.text, 0.62) : solid(Theme.text, 0.40)
 

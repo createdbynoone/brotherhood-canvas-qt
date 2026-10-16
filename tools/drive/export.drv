@@ -1,0 +1,12 @@
+# Export must look like the screen: sticky notes, marker headings, arrows, images, titles.
+eval (board.addNode("note", 700, 330, 260, 200), "added") + ""
+eval (board.setNodeData(board.selectedId, "content", "# Ideas\n\nBuy **paper**\n\n## Lista\n- one\n- two"), board.setNodeData(board.selectedId, "noteColor", "#E8B547"), "set") + ""
+eval (board.connectNodes("txtA-0000", "bottom", board.selectedId, "left"), "edges=" + board.edges.rowCount()) + ""
+eval (app.sidebarOpen = false) + ""
+key f
+wait 800
+shot $WORK/screen.png
+eval (board.clearSelection(), canvas.exportBoard("file://$WORK/export.png", false), "export started") + ""
+wait 6000
+eval "exporting? " + canvas.exporting
+quit

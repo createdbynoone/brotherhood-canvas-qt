@@ -12,24 +12,73 @@ Item {
     readonly property real padTop: isNote ? 15 : 12
     clip: true
 
-    // Split Markdown into heading lines and the runs of ordinary text between them
-    readonly property var segments: {
-        if (!isNote) return []
+    // What was typed is what is shown: one row per source line. Blank lines stay as gaps (Markdown would merge them),
+    // a single Enter stays a line break, and list items hang from a narrow marker instead of Qt's wide list indent.
+    // Whole-document Markdown (tables, code, quotes, rules, images) or a very long text falls back to the plain renderer.
+    readonly property bool complex: {
+        const c = node.content
+        return c.length > 6000 || /```|^\s*\|.*\|\s*$|^\s*>|^\s*!\[|^\s*([-*_])(\s*\1){2,}\s*$/m.test(c)
+    }
+    readonly property var rows: {
+        if (complex) return []
         const out = []
-        let run = []
-        const flush = () => { if (run.length) { out.push({ h: 0, t: run.join("\n") }); run = [] } }
         for (const line of node.content.split("\n")) {
-            const m = /^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line)
-            if (m) { flush(); out.push({ h: m[1].length, t: m[2] }) }
-            else run.push(line)
+            if (line.trim().length === 0) { out.push({ k: "gap" }); continue }
+            let m = /^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line)
+            if (m) { out.push({ k: "h", h: m[1].length, t: m[2] }); continue }
+            m = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/.exec(line)
+            if (m) { out.push({ k: "li", lvl: Math.min(3, Math.floor(m[1].replace(/\t/g, "    ").length / 2)), m: /\d/.test(m[2]) ? m[2] : "\u2022", t: m[3] }); continue }
+            out.push({ k: "p", t: line })
         }
-        flush()
         return out
     }
 
+    Column {
+        visible: !root.complex && !node.editing && node.content.length > 0
+        x: root.padX; y: root.padTop
+        width: parent.width - root.padX * 2
+        spacing: 3
+        Repeater {
+            model: root.rows
+            delegate: Item {
+                id: ln
+                required property var modelData
+                readonly property bool heading: modelData.k === "h"
+                readonly property real indent: modelData.k === "li" ? modelData.lvl * 14 : 0
+                readonly property real markW: modelData.k === "li" ? 17 : 0
+                width: parent.width
+                height: modelData.k === "gap" ? 11 : body.implicitHeight
+                Text {
+                    visible: ln.modelData.k === "li"
+                    x: ln.indent; width: ln.markW
+                    text: ln.modelData.m || ""
+                    color: root.ink; opacity: 0.75
+                    font.family: Theme.sans; font.pixelSize: 13; lineHeight: 1.25
+                    renderType: Text.QtRendering
+                }
+                Text {
+                    id: body
+                    visible: ln.modelData.k !== "gap"
+                    x: ln.indent + ln.markW
+                    width: ln.width - x
+                    text: ln.modelData.t || ""
+                    textFormat: ln.heading ? Text.PlainText : Text.MarkdownText
+                    wrapMode: Text.Wrap
+                    color: root.ink
+                    // notes draw headings in the marker face (uppercase); text cards in the UI face, bold
+                    font.family: ln.heading && root.isNote ? Theme.markerFamily : Theme.sans
+                    font.weight: ln.heading && (!root.isNote || Theme.marker.length === 0) ? Font.Bold : Font.Normal
+                    font.capitalization: ln.heading && root.isNote ? Font.AllUppercase : Font.MixedCase
+                    font.pixelSize: ln.heading ? (root.isNote ? (modelData.h === 1 ? 30 : modelData.h === 2 ? 23 : 18) : (modelData.h === 1 ? 22 : modelData.h === 2 ? 18 : 15)) : 13
+                    lineHeight: ln.heading && root.isNote ? 1.0 : 1.25
+                    renderType: Text.QtRendering
+                }
+            }
+        }
+    }
     Text {
         id: rendered
-        visible: !root.isNote && !node.editing && node.content.length > 0
+        visible: root.complex && !node.editing && node.content.length > 0
         x: root.padX; y: root.padTop
         width: parent.width - root.padX * 2
         height: parent.height - root.padTop - 10
@@ -44,29 +93,6 @@ Item {
         renderType: Text.QtRendering
         clip: true
     }
-    Column {
-        visible: root.isNote && !node.editing && node.content.length > 0
-        x: root.padX; y: root.padTop
-        width: parent.width - root.padX * 2
-        spacing: 4
-        Repeater {
-            model: root.segments
-            delegate: Text {
-                required property var modelData
-                width: parent.width
-                text: modelData.t
-                textFormat: modelData.h > 0 ? Text.PlainText : Text.MarkdownText
-                wrapMode: Text.Wrap
-                color: root.ink
-                font.family: modelData.h > 0 ? Theme.markerFamily : Theme.sans
-                font.weight: modelData.h > 0 && Theme.marker.length === 0 ? Font.Bold : Font.Normal
-                font.capitalization: modelData.h > 0 ? Font.AllUppercase : Font.MixedCase
-                font.pixelSize: modelData.h === 1 ? 30 : modelData.h === 2 ? 23 : modelData.h > 2 ? 18 : 13
-                lineHeight: modelData.h > 0 ? 1.0 : 1.25
-                renderType: Text.QtRendering
-            }
-        }
-    }
     Txt {
         visible: !node.editing && node.content.length === 0
         x: root.padX; y: root.padTop
@@ -79,7 +105,7 @@ Item {
 
     Loader {
         anchors.fill: parent
-        active: node.editing
+        active: node.editing && !Cam.exporting
         sourceComponent: Item {
             TextEdit {
                 id: ed

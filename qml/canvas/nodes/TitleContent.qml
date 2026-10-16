@@ -27,7 +27,7 @@ Item {
     }
     Loader {
         anchors.fill: parent
-        active: node.editing
+        active: node.editing && !Cam.exporting
         sourceComponent: Item {
             TextEdit {
                 id: ed

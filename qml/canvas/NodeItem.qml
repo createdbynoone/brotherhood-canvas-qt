@@ -185,7 +185,7 @@ Item {
     // Everything that needs the live zoom lives in a loader that exists only for the selected / hovered node
     Loader {
         anchors.fill: parent
-        active: self.selected || self.dropTarget || self.hovered
+        active: !Cam.exporting && (self.selected || self.dropTarget || self.hovered)
         sourceComponent: Component { NodeChrome { owner: self } }
     }
 }

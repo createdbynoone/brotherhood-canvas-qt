@@ -58,6 +58,7 @@ public:
     Q_INVOKABLE void revealNode(const QString &id);
     Q_INVOKABLE void openNodeFile(const QString &id);
     Q_INVOKABLE void exportBoard(const QUrl &file, bool selectionOnly);
+    void setAppController(QObject *app) { m_app = app; }
 
 signals:
     void stateChanged();
@@ -85,5 +86,6 @@ private:
     QThreadPool m_io, m_work;
     int m_importing = 0, m_pasteRepeat = 0;
     bool m_exporting = false, m_loading = false;
+    QObject *m_app = nullptr;
     QString m_lastPasteMarker;
 };

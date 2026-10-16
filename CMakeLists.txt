@@ -27,6 +27,7 @@ set(APP_SOURCES
     src/canvas/cullproxy.cpp
     src/canvas/boardsmodel.cpp
     src/canvas/exporter.cpp
+    src/canvas/sceneexport.cpp
     src/canvas/mediaprovider.cpp
     src/canvas/canvascontroller.cpp
 )

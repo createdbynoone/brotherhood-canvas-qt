@@ -3,6 +3,7 @@
 #include "../core/prefs.h"
 #include "../platform/mac.h"
 #include "exporter.h"
+#include "sceneexport.h"
 #include "mediaprovider.h"
 
 #include <QClipboard>
@@ -362,15 +363,42 @@ void CanvasController::exportBoard(const QUrl &file, bool selectionOnly) {
     QSet<QString> only;
     if (selectionOnly) for (const auto &id : m_board.selectedIds()) only.insert(id);
     const QString root = m_vault.path();
-    const QString brand = qApp->property("brandFamily").toString();
+    const QString brand = qApp->property("brandFamily").toString(), marker = qApp->property("markerFamily").toString();
+
+    // What to draw: the chosen nodes, and the edges that join two of them
+    QRectF box;
+    QStringList nodeIds, edgeIds;
+    for (const auto &n : b.nodes) {
+        if (!only.isEmpty() && !only.contains(n.id)) continue;
+        const QRectF r(n.x, n.y, n.w, n.h);
+        box = box.isNull() ? r : box.united(r);
+        nodeIds << n.id;
+    }
+    if (nodeIds.isEmpty()) { emit toast(QStringLiteral("There is nothing to export"), 2); return; }
+    QSet<QString> ids(nodeIds.begin(), nodeIds.end());
+    for (const auto &e : b.edges) if (ids.contains(e.source) && ids.contains(e.target)) edgeIds << e.id;
+    box.adjust(-64, -64, 64, 64);
+
     m_exporting = true; emit exportingChanged();
-    auto *w = new QFutureWatcher<QString>(this);
-    connect(w, &QFutureWatcher<QString>::finished, this, [this, w, out] {
+    auto done = [this, out](const QString &err) {
         m_exporting = false; emit exportingChanged();
-        const QString err = w->result();
         if (err.isEmpty()) { emit toast(QStringLiteral("Exported %1").arg(QFileInfo(out).fileName()), 1); Mac::revealInFinder(out); }
         else emit toast(err, 2);
-        w->deleteLater();
-    });
+    };
+    // The real scene first (identical to the screen); the old painter only if that scene cannot be built
+    SceneExport::Params p;
+    p.board = &m_board; p.app = m_app; p.out = out; p.box = box;
+    if (!only.isEmpty()) { p.only = nodeIds; p.onlyEdges = edgeIds; }
+    p.pattern = m_board.background(); p.brand = brand; p.marker = marker;
+    auto *job = new SceneExport(p, this);
+    QString why;
+    if (job->start(&why)) {
+        connect(job, &SceneExport::finished, this, [job, done](const QString &err) { done(err); job->deleteLater(); });
+        return;
+    }
+    qWarning().noquote() << "scene export unavailable, using the painter:" << why;
+    delete job;
+    auto *w = new QFutureWatcher<QString>(this);
+    connect(w, &QFutureWatcher<QString>::finished, this, [w, done] { done(w->result()); w->deleteLater(); });
     w->setFuture(QtConcurrent::run(&m_work, [b, only, root, out, brand] { return Exporter::render(b, only, root, out, brand); }));
 }

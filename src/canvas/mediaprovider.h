@@ -9,7 +9,8 @@ class MediaProvider : public QQuickAsyncImageProvider {
 public:
     MediaProvider();
     static void setRoot(const QString &vaultPath);
-    static void dropCache();               // decoded copies only: anything shown is re-read from the vault when asked again
+    static void dropCache();
+    static int pending();                  // requests still being decoded (the exporter waits for zero)               // decoded copies only: anything shown is re-read from the vault when asked again
     QQuickImageResponse *requestImageResponse(const QString &id, const QSize &requestedSize) override;
 
 private:
